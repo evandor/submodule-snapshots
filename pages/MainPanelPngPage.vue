@@ -57,7 +57,7 @@
 import {onMounted, ref, watchEffect} from "vue";
 import {useRoute} from "vue-router";
 import {date} from "quasar"
-import {useUiStore} from "src/stores/uiStore";
+import {useUiStore} from "src/ui/stores/uiStore";
 import Analytics from "src/core/utils/google-analytics";
 import PdfService from "src/snapshots/services/PdfService";
 import {SavedBlob} from "src/models/SavedBlob";
