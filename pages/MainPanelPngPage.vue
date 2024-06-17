@@ -60,7 +60,7 @@ import {date} from "quasar"
 import {useUiStore} from "src/ui/stores/uiStore";
 import Analytics from "src/core/utils/google-analytics";
 import PdfService from "src/snapshots/services/PdfService";
-import {SavedBlob} from "src/models/SavedBlob";
+import {SavedBlob} from "src/snapshots/models/SavedBlob";
 
 const route = useRoute()
 

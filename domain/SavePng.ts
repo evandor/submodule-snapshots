@@ -1,12 +1,11 @@
 import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import {Tab} from "src/tabsets/models/Tab";
-import {usePermissionsStore} from "stores/permissionsStore";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
 import PdfService from "src/snapshots/services/PdfService";
 import TabsetService from "src/tabsets/services/TabsetService";
 import ContentUtils from "src/core/utils/ContentUtils";
-import {BlobType} from "src/models/SavedBlob";
+import {BlobType} from "src/snapshots/models/SavedBlob";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 

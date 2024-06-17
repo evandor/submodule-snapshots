@@ -1,10 +1,10 @@
 import {useDB} from "src/services/usePersistenceService";
 import {Tab} from "src/tabsets/models/Tab";
 import backendApi from "src/services/BackendApi";
-import {BlobType, SavedBlob} from "src/models/SavedBlob";
 import _ from "lodash"
+import {BlobType, SavedBlob} from "src/snapshots/models/SavedBlob";
 
-const {db} = useDB()
+const {snapshotsIndexedDb} = useDB()
 
 class PdfService {
 
@@ -25,31 +25,31 @@ class PdfService {
     }
 
     saveBlob(tab: Tab, data: Blob, type: BlobType, remark: string | undefined = undefined): Promise<any> {
-        return db.saveBlob(tab.id, tab.url || '', data, type, remark)
+        return snapshotsIndexedDb.saveBlob(tab.id, tab.url || '', data, type, remark)
     }
 
     getPdfs() {
-        return db.getBlobs(BlobType.PDF)
+        return snapshotsIndexedDb.getBlobs(BlobType.PDF)
     }
 
     getPngs() {
-        return db.getBlobs(BlobType.PNG)
+        return snapshotsIndexedDb.getBlobs(BlobType.PNG)
     }
 
     async getPngsForTab(tabId: string) {
-        const blobs = await db.getBlobsForTab(tabId)
+        const blobs = await snapshotsIndexedDb.getBlobsForTab(tabId)
         //console.log("got blobs", blobs)
         return _.filter(blobs, (b: SavedBlob) => b.type === BlobType.PNG)
     }
 
     async getPdfsForTab(tabId: string) {
-        const blobs = await db.getBlobsForTab(tabId)
+        const blobs = await snapshotsIndexedDb.getBlobsForTab(tabId)
         return _.filter(blobs, (b: SavedBlob) => b.type === BlobType.PDF)
     }
 
     deleteBlob(tabId: string, elementId: string) {
         console.log("deleting blob", tabId, elementId)
-        db.deleteBlob(tabId, elementId)
+      snapshotsIndexedDb.deleteBlob(tabId, elementId)
     }
 }
 
