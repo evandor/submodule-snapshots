@@ -59,8 +59,8 @@ import {useRoute} from "vue-router";
 import {date} from "quasar"
 import {useUiStore} from "src/ui/stores/uiStore";
 import Analytics from "src/core/utils/google-analytics";
-import PdfService from "src/snapshots/services/PdfService";
 import {SavedBlob} from "src/snapshots/models/SavedBlob";
+import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 
 const route = useRoute()
 
@@ -97,7 +97,7 @@ watchEffect(async () => {
   if (blobId.value && useUiStore().dbReady) {
     // const tabId = suggestion.value['data' as keyof object]['tabId' as keyof object]
     // console.log("got tabId", tabId)
-    pngs.value = await PdfService.getPngsForTab(tabId.value)
+    pngs.value = await useSnapshotsService().getPngsForTab(tabId.value)
     console.log("pngs", pngs.value)
       setImage(0);
   }

@@ -2,10 +2,10 @@ import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import {Tab} from "src/tabsets/models/Tab";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
-import PdfService from "src/snapshots/services/PdfService";
 import TabsetService from "src/tabsets/services/TabsetService";
 import ContentUtils from "src/core/utils/ContentUtils";
 import {BlobType} from "src/snapshots/models/SavedBlob";
+import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 
@@ -36,13 +36,12 @@ export class SavePngCommand implements Command<any> {
             (res) => {
                 console.log("getContent returned result with length", res?.content?.length, this.chromeTabId)
                 let html = ContentUtils.setBaseHref(this.tab.url || '', res.content)
-                return PdfService.screenshotFrom(html)
+                return useSnapshotsService().screenshotFrom(html)
                     .then((res:any) => {
                         console.log("res", res, typeof res)
                         console.log("res2", typeof res.data)
 
-                        PdfService.saveBlob(this.tab, res.data, BlobType.PNG, this.remark)
-
+                        useSnapshotsService().saveBlob(this.tab.id, this.tab.url || '', res.data, BlobType.PNG, this.remark)
 
                         handleSuccess(
                             new ExecutionResult(
