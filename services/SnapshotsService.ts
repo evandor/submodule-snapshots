@@ -25,6 +25,11 @@ export function useSnapshotsService() {
     return _.filter(blobs, (b: SavedBlob) => b.type === BlobType.PDF)
   }
 
+  const getBlobForTab = async (tabId: string, type: BlobType) => {
+    const blobs = await db.getBlobsForTab(tabId)
+    return _.filter(blobs, (b: SavedBlob) => b.type === type)
+  }
+
   const convertFrom = (html: string) => {
     return backendApi.createPdf(html)
   }
@@ -50,7 +55,8 @@ export function useSnapshotsService() {
     convertFrom,
     saveBlob,
     screenshotFrom,
-    deleteBlob
+    deleteBlob,
+    getBlobForTab
   }
 }
 
