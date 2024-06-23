@@ -1,22 +1,23 @@
 import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
-import {Tab} from "src/tabsets/models/Tab";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
-import TabsetService from "src/tabsets/services/TabsetService";
 import ContentUtils from "src/core/utils/ContentUtils";
 import {BlobType} from "src/snapshots/models/SavedBlob";
-import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
+import {useSnapshotsService} from "src/snapshots/services/SnapshotsService"
 
-const {handleSuccess, handleError} = useNotificationHandler()
+const {handleSuccess} = useNotificationHandler()
 
 export class SaveHtmlCommand implements Command<any> {
 
-  public readonly chromeTabId: number | undefined;
-
   constructor(
-    public tab: Tab,
+    public chromeTab: chrome.tabs.Tab,
+    public saveAsId: string,
     public remark: string | undefined = undefined) {
-    this.chromeTabId = this.tab.url ? TabsetService.chromeTabIdFor(this.tab.url) : undefined
+     // chrome.tabs.query({currentWindow: true})
+     //  .then((tabs: chrome.tabs.Tab[]) => {
+     //    const candidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === url)
+     //    this.chromeTabId = candidates.length > 0 ? candidates[0].id : undefined
+     //  })
   }
 
   async execute(): Promise<ExecutionResult<any>> {
@@ -24,21 +25,17 @@ export class SaveHtmlCommand implements Command<any> {
     //     handleError("missing permission pageCapture")
     //     return Promise.reject("xxx")
     // }
-    if (!this.chromeTabId) {
-      return Promise.reject("could not find chromeTabId for tab")
-    }
-    console.log("capturing tab id", this.chromeTabId)
+    console.log("capturing tab id", this.chromeTab.id)
 
     chrome.tabs.sendMessage(
-      this.chromeTabId || 0,
+      this.chromeTab.id || 0,
       "getContent",
       {},
       (res) => {
-        console.log("getContent returned result with length", res?.content?.length, this.chromeTabId)
-        let html = ContentUtils.setBaseHref(this.tab.url || '', res.content)
-        //html += "<template><span id=\"tabsetsControl\">xxx</span></template>"
+        console.log("getContent returned result with length", res?.content?.length, this.chromeTab.id)
+        let html = ContentUtils.setBaseHref(this.chromeTab.url || '', res.content)
 
-        useSnapshotsService().saveBlob(this.tab.id, this.tab.url || '', new Blob([html], {
+        useSnapshotsService().saveBlob(this.saveAsId, this.chromeTab.url || '', new Blob([html], {
           type: 'text/html'
         }), BlobType.HTML, this.remark)
 
@@ -46,8 +43,6 @@ export class SaveHtmlCommand implements Command<any> {
           new ExecutionResult(
             "done",
             "Snapshot created"))
-
-
       })
 
 
@@ -60,5 +55,5 @@ export class SaveHtmlCommand implements Command<any> {
 
 
 SaveHtmlCommand.prototype.toString = function cmdToString() {
-  return `SaveHtmlCommand: {tabId=${this.tab.id}, chromeTabId=${this.chromeTabId}}`;
+  return `SaveHtmlCommand: {saveAsId=${this.saveAsId}, chromeTab=#${this.chromeTab.id}}`;
 };
