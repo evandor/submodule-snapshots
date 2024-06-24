@@ -1,4 +1,5 @@
-import {BlobType, SavedBlob} from "src/snapshots/models/SavedBlob";
+import {SavedBlob} from "src/snapshots/models/SavedBlob";
+import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 
 interface SnapshotsPersistence {
 
@@ -6,11 +7,19 @@ interface SnapshotsPersistence {
 
   init(): Promise<any>
 
-  getBlobs(type: BlobType): Promise<any[]>
+  getBlobs(type: BlobType): Promise<SavedBlob[]>
 
-  saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
+  getBlobKeys(): Promise<string[]>
+
+  saveBlob(id: string, data: Blob): Promise<any>
+
+  saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
 
   getBlobsForTab(tabId: string): Promise<SavedBlob[]>
+
+  getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]>
+
+  getBlobFor(sourceId: string, index:number): Promise<Blob>
 
   deleteBlob(tabId: string, elementId: string): void;
 

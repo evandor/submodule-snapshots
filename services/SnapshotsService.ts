@@ -1,7 +1,7 @@
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
-import _ from "lodash"
-import {BlobType, SavedBlob} from "src/snapshots/models/SavedBlob";
 import backendApi from "src/services/BackendApi";
+import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
+import {BlobType, BlobMetadata} from "src/snapshots/models/BlobMetadata";
 
 let db: SnapshotsPersistence = null as unknown as SnapshotsPersistence
 
@@ -14,28 +14,32 @@ export function useSnapshotsService() {
     // initListeners()
   }
 
-  const getPngsForTab = async (tabId: string) => {
-    const blobs = await db.getBlobsForTab(tabId)
-    console.log("got blobs", blobs)
-    return _.filter(blobs, (b: SavedBlob) => b.type === BlobType.PNG)
-  }
-
-  const getPdfsForTab = async (tabId: string) => {
-    const blobs = await db.getBlobsForTab(tabId)
-    return _.filter(blobs, (b: SavedBlob) => b.type === BlobType.PDF)
-  }
-
   const getBlobForTab = async (tabId: string, type: BlobType) => {
     const blobs = await db.getBlobsForTab(tabId)
-    return _.filter(blobs, (b: SavedBlob) => b.type === type)
+    return null//_.filter(blobs, (b: SavedBlob) => b.type === type)
   }
 
   const convertFrom = (html: string) => {
     return backendApi.createPdf(html)
   }
 
-  const saveBlob = (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined): Promise<any> => {
-    return db.saveBlob(id, url, data, type, remark)
+  // const saveBlob = async (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined) => {
+  //   await useSnapshotsStore().saveBlob(id,data)
+  //   await useSnapshotsStore().saveMetadata(id,url,type,remark)
+  // }
+
+  const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
+    await useSnapshotsStore().saveHTML(id,url, html, remark)
+    // await useSnapshotsStore().saveBlob(id,data)
+    // await useSnapshotsStore().saveMetadata(id,url,type,remark)
+  }
+
+  const getMetadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
+    return useSnapshotsStore().metadataFor(sourceId, type)
+  }
+
+  const getBlobFor = (sourceId: string, index:number): Promise<Blob> => {
+    return useSnapshotsStore().blobFor(sourceId, index)
   }
 
   const screenshotFrom = (html: string) => {
@@ -43,19 +47,18 @@ export function useSnapshotsService() {
   }
 
   const deleteBlob = (tabId: string, elementId: string) => {
-    console.log("deleting blob", tabId, elementId)
-    db.deleteBlob(tabId, elementId)
+    useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
 
   return {
     init,
-    getPngsForTab,
-    getPdfsForTab,
     convertFrom,
-    saveBlob,
+    saveHTML,
     screenshotFrom,
+    getMetadataFor,
     deleteBlob,
+    getBlobFor,
     getBlobForTab
   }
 }

@@ -2,8 +2,8 @@ import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
 import ContentUtils from "src/core/utils/ContentUtils";
-import {BlobType} from "src/snapshots/models/SavedBlob";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService"
+import {BlobType} from "src/snapshots/models/Metadata";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 
@@ -25,11 +25,13 @@ export class SaveHtmlCommand implements Command<any> {
     //     handleError("missing permission pageCapture")
     //     return Promise.reject("xxx")
     // }
-    console.log("capturing tab id", this.chromeTab.id)
+    console.log("capturing tab", this.chromeTab.id, this.chromeTab.url)
 
     chrome.tabs.query({currentWindow: true}).then((r: any) => {
       console.log("tabs", r)
     })
+
+    // await chrome.tabs.update(this.chromeTab.id || 0, {active: true})
 
     chrome.tabs.sendMessage(
       this.chromeTab.id || 0,
@@ -40,9 +42,7 @@ export class SaveHtmlCommand implements Command<any> {
         if (res && res.content) {
           let html = ContentUtils.setBaseHref(this.chromeTab.url || '', res.content)
 
-          useSnapshotsService().saveBlob(this.saveAsId, this.chromeTab.url || '', new Blob([html], {
-            type: 'text/html'
-          }), BlobType.HTML, this.remark)
+          useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
 
           handleSuccess(
             new ExecutionResult(
