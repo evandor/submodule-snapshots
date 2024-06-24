@@ -48,6 +48,7 @@ export class SaveHtmlCommand implements Command<any> {
             new ExecutionResult(
               "done",
               "Snapshot created"))
+          return
         }
         handleError("content empty...")
       })
