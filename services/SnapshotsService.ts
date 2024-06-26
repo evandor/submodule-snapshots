@@ -1,23 +1,25 @@
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
 import backendApi from "src/services/BackendApi";
 import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
-import {BlobType, BlobMetadata} from "src/snapshots/models/BlobMetadata";
+import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
+import {Annotation} from "src/snapshots/models/Annotation";
+import {uid} from "quasar";
 
-let db: SnapshotsPersistence = null as unknown as SnapshotsPersistence
+//let db: SnapshotsPersistence = null as unknown as SnapshotsPersistence
 
 export function useSnapshotsService() {
 
-  const init = async (storage: SnapshotsPersistence) => {
-    console.debug(" ...initializing snapshotsService with", storage.getServiceName())
-    db = storage
-    await db.init()
+  const init = async () => {
+    console.debug(" ...initializing snapshotsService")
+    //db = storage
+    //await db.init()
     // initListeners()
   }
 
-  const getBlobForTab = async (tabId: string, type: BlobType) => {
-    const blobs = await db.getBlobsForTab(tabId)
-    return null//_.filter(blobs, (b: SavedBlob) => b.type === type)
-  }
+  // const getBlobForTab = async (tabId: string, type: BlobType) => {
+  //   const blobs = await db.getBlobsForTab(tabId)
+  //   return null//_.filter(blobs, (b: SavedBlob) => b.type === type)
+  // }
 
   const convertFrom = (html: string) => {
     return backendApi.createPdf(html)
@@ -29,7 +31,7 @@ export function useSnapshotsService() {
   // }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
-    await useSnapshotsStore().saveHTML(id,url, html, remark)
+    await useSnapshotsStore().saveHTML(id, url, html, remark)
     // await useSnapshotsStore().saveBlob(id,data)
     // await useSnapshotsStore().saveMetadata(id,url,type,remark)
   }
@@ -38,7 +40,7 @@ export function useSnapshotsService() {
     return useSnapshotsStore().metadataFor(sourceId, type)
   }
 
-  const getBlobFor = (sourceId: string, index:number): Promise<Blob> => {
+  const getBlobFor = (sourceId: string, index: number): Promise<Blob> => {
     return useSnapshotsStore().blobFor(sourceId, index)
   }
 
@@ -50,6 +52,16 @@ export function useSnapshotsService() {
     useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
+  const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined, rect: object, viewport: object, comment: string | undefined) => {
+    // console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
+    const annotation = new Annotation(uid(), selection, text, rect, viewport, comment)
+    useSnapshotsStore().createAnnotation(tabId, index, annotation)
+  }
+
+  const deleteAnnotation = (sourceId: string, i:number,a: Annotation ) => {
+    useSnapshotsStore().deleteAnnotation(sourceId, i, a)
+  }
+
 
   return {
     init,
@@ -59,7 +71,8 @@ export function useSnapshotsService() {
     getMetadataFor,
     deleteBlob,
     getBlobFor,
-    getBlobForTab
+    createAnnotation,
+    deleteAnnotation
   }
 }
 

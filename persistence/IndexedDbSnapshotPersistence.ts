@@ -2,7 +2,9 @@ import {IDBPDatabase, openDB} from "idb";
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
 import {SavedBlob} from "src/snapshots/models/SavedBlob";
 import _ from "lodash"
-import {BlobType, BlobMetadata} from "src/snapshots/models/BlobMetadata";
+import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
+import {Annotation} from "src/snapshots/models/Annotation";
+import {uid} from "quasar";
 
 class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
 
@@ -11,18 +13,19 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   private BLOBS_STORE_IDENT = 'blobs';
   private META_STORE_IDENT = 'metadata';
 
+  // private ANNOTATION_STORE_IDENT = 'annotations';
+
   getServiceName(): string {
     return this.constructor.name
   }
 
   async init() {
-    console.debug(" ...initializing tabsets (IndexedDbSnapshotStorage)")
+    console.debug(` ...initializing ${this.getServiceName()}`)
     this.db = await this.initDatabase()
     return Promise.resolve()
   }
 
   private async initDatabase(): Promise<IDBPDatabase> {
-    console.debug(" ...about to initialize indexedDB (IndexedDbSnapshotStorage)")
     const ctx = this
     return await openDB("BlobsDB", 1, {
       upgrade(db) {
@@ -46,10 +49,10 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.resolve(undefined);
   }
 
-  async deleteBlob(tabId: string, elementId: string) {
-    let blobsForTab = await this.getBlobsForTab(tabId)
-    blobsForTab = _.filter(blobsForTab, b => b.id !== elementId)
-    await this.db.put('blobs', blobsForTab, tabId)
+  async deleteBlob(blobId: string) {
+    // let blobsForTab = await this.getBlobsForTab(tabId)
+    // blobsForTab = _.filter(blobsForTab, b => b.id !== elementId)
+    await this.db.delete('blobs', blobId)
   }
 
   getBlobs(type: BlobType): Promise<SavedBlob[]> {
@@ -83,10 +86,59 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return this.db.get(this.META_STORE_IDENT, sourceId)
   }
 
-  async getBlobFor(sourceId: string, index: number): Promise<Blob> {
-    const res = await this.db.get(this.BLOBS_STORE_IDENT, sourceId) as Blob[]
-    return res[index]
+  // actually not getting a blobMetadata array with simple "getAll", so:
+  // https://stackoverflow.com/questions/47931595/indexeddb-getting-all-data-with-keys
+  async getMetadata() {
+    // const mds:BlobMetadata[][] = await this.db.getAll(this.META_STORE_IDENT)
+    // console.log("===", mds)
+    // return _.groupBy(mds, )
+    //return mds
+
+    const transaction = this.db.transaction([this.META_STORE_IDENT]);
+    const object_store = transaction.objectStore(this.META_STORE_IDENT);
+    const res:Map<string, BlobMetadata[]> = new Map()
+    return object_store.openCursor()
+      .then((cursor: any) => {
+        if (cursor) {
+          let key = cursor.primaryKey;
+          let value = cursor.value;
+          console.log(key, value);
+          res.set(key,value)
+          cursor.continue();
+        }
+        return res
+      })
+      .catch((err: any) => {
+        console.warn("error", err)
+        return res
+      })
   }
+
+  async getBlobFor(sourceId: string, index: number): Promise<Blob> {
+    const mds = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
+    const md = mds[index]
+    return await this.db.get(this.BLOBS_STORE_IDENT, md.blobId) as Blob
+  }
+
+  async addAnnotation(sourceId: string, index: number, annotation: Annotation) {
+    const res = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
+    console.log("adding annotation to ", res, index)
+    res[index].annotations ? res[index].annotations.push(annotation) : res[index].annotations = [annotation]
+    await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), sourceId)
+  }
+
+  async deleteAnnotation(sourceId: string, index: number, toDelete: Annotation) {
+    const mds = await this.getMetadataFor(sourceId, BlobType.HTML)
+    const md = mds[index]
+    const annotations = _.filter(md.annotations, (a: Annotation) => a.id !== toDelete.id)
+    md.annotations = annotations
+    // await this.db.put(this.META_STORE_IDENT, [metadata], sourceId)
+  }
+
+  async deleteMetadataForSource (sourceId: string) {
+    return this.db.delete(this.META_STORE_IDENT, sourceId)
+  }
+
 
   /**
    * add blob for id; push to array if already existing
@@ -106,17 +158,19 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
    * // TODO transaction
    */
   async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    const existingMetadata = await this.db.get(this.META_STORE_IDENT, id)
-    const existingBlob = await this.db.get(this.BLOBS_STORE_IDENT, id)
-    const metadata = new BlobMetadata(id, type, url, remark)
+    const existingMetadata: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, id)
+    //const existingBlob = await this.db.get(this.BLOBS_STORE_IDENT, id)
+
+    const blobId = uid()
+    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+
+    const metadata = new BlobMetadata(id, blobId, type, url, remark)
+
     if (existingMetadata) {
       existingMetadata.push(metadata)
-      existingBlob.push(data)
       await this.db.put(this.META_STORE_IDENT, existingMetadata, id)
-      return this.db.put(this.BLOBS_STORE_IDENT, existingBlob, id)
     } else {
       await this.db.put(this.META_STORE_IDENT, [metadata], id)
-      return this.db.put(this.BLOBS_STORE_IDENT, [data], id)
     }
   }
 

@@ -1,5 +1,6 @@
 import {SavedBlob} from "src/snapshots/models/SavedBlob";
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
+import {Annotation} from "src/snapshots/models/Annotation";
 
 interface SnapshotsPersistence {
 
@@ -19,9 +20,13 @@ interface SnapshotsPersistence {
 
   getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]>
 
+  getMetadata(): Promise<Map<string, BlobMetadata[]>>
+
   getBlobFor(sourceId: string, index:number): Promise<Blob>
 
-  deleteBlob(tabId: string, elementId: string): void;
+  deleteBlob(blobId: string): void;
+
+  addAnnotation(tabId: string, index: number, annotation: Annotation): void
 
   compactDb(): Promise<any>
 
@@ -29,6 +34,11 @@ interface SnapshotsPersistence {
 
   // optional migration code for 0.4.11 to 0.5.0
   //migrate(): any;
+
+  deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): void;
+
+  deleteMetadataForSource(sourceId: string):void
+
 }
 
 export default SnapshotsPersistence

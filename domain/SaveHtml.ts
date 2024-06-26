@@ -3,7 +3,6 @@ import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
 import ContentUtils from "src/core/utils/ContentUtils";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService"
-import {BlobType} from "src/snapshots/models/Metadata";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 

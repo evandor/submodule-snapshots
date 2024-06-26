@@ -2,7 +2,7 @@
 
   <div v-html="htmlSnapshot"></div>
 
-  <div class="q-ma-lg q-pa-lg bg-white" :style="mainOverlayStyle()">
+  <div class="q-ma-lg q-pa-lg bg-white" :style="mainOverlayStyle()" id="mainOverlay">
 
     <div class="row">
       <div class="col">
@@ -13,35 +13,51 @@
         <div class="text-caption">Size {{ Math.round((currentBlob?.size || 0) / 1024) }} kB</div>
       </div>
     </div>
-    <div class="row">
+    <div class="row" v-if="metadata.length > 1">
       <div class="col">
         <hr>
         <div class="q-pa-lg">
           <div class="q-gutter-md">
             <q-pagination
               v-model="current"
-              :max="htmls.length"
+              :max="metadata.length"
               direction-links/>
           </div>
         </div>
         <hr>
       </div>
     </div>
+    <template v-if="annotations.length > 0">
+      <div class="row" v-for="(a,index) in annotations">
+        <div class="col-9 ellipsis">
+          {{ a.text }}
+        </div>
+        <div class="col-3">
+          <q-btn icon="visibility" class="q-ma-none" size="xs" @click="restoreAnnotation(a)"/>
+          <q-btn icon="delete"  class="q-ma-none" size="xs" @click="deleteAnnotation(a, index)"/>
+        </div>
+      </div>
+    </template>
   </div>
 
-  <div class="q-ma-lg q-pa-lg bg-white" v-if="selectedText" :style="secondOverlayStyle()">
-    <div class="text-body2">
-      Selected: {{ selectedText }}<br>
-    </div>
-    <div class="text-body2">
-      Selection: {{ serializedSelection }}<br>
-    </div>
-    <div class="text-body2">
-      <q-input type="textarea" v-model="comment" />
-    </div>
-    <div class="text-body2">
-      <q-btn label="submit" @click="createAnnotation()" />
-    </div>
+  <div class="q-ma-xs q-pa-xs bg-white" v-if="selectedText" :style="secondOverlayStyle()" id="secondOverlay">
+    <template v-if="overlayView === 'menu'">
+      <div class="text-body2">
+        <q-btn icon="o_save" class="q-ma-none q-pa-none" @click="showAddAnnotationForm()">
+          <q-tooltip>Save selection</q-tooltip>
+        </q-btn>
+      </div>
+    </template>
+    <template v-else>
+      <div class="row">
+        <div class="col-8 text-body2">
+          <q-input dense type="text" v-model="comment"/>
+        </div>
+        <div class="col-4 text-body2">
+          <q-btn label="submit" @click="createAnnotation()"/>
+        </div>
+      </div>
+    </template>
   </div>
 
 
@@ -55,9 +71,9 @@ import {useUiStore} from "src/ui/stores/uiStore";
 import Analytics from "src/core/utils/google-analytics";
 import {date} from "quasar";
 import {useUtils} from "src/core/services/Utils";
-import {SavedBlob} from "src/snapshots/models/SavedBlob";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
+import {Annotation} from "src/snapshots/models/Annotation";
 
 const route = useRoute()
 const {sanitizeAsHtml, serializeSelection, restoreSelection} = useUtils()
@@ -65,16 +81,22 @@ const {sanitizeAsHtml, serializeSelection, restoreSelection} = useUtils()
 
 const tabId = ref<string>()
 const blobId = ref<string>()
-const htmls = ref<BlobMetadata[]>([])
+const metadata = ref<BlobMetadata[]>([])
 const html = ref<BlobMetadata | undefined>(undefined)
 const currentBlob = ref<Blob | undefined>(undefined)
 const current = ref(0)
 const htmlSnapshot = ref('loading...')
 const selectedText = ref<string | undefined>(undefined)
 const selection = ref<any>()
+const fixedSelection = ref<any>()
 const serializedSelection = ref<any>()
+const scrollX = ref(0)
 const scrollY = ref(0)
 const comment = ref('')
+const selectionRect = ref<object>({})
+const viewPort = ref<object>({})
+const overlayView = ref('menu')
+const annotations = ref<Annotation[]>([])
 
 onMounted(() => {
   Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href);
@@ -83,9 +105,28 @@ onMounted(() => {
   //   console.log("===", document.getSelection());
   // };
 
-  document.onpointerup = () => {
+  document.onpointerup = (e: any) => {
+
+    const mainOverlayElement = document.getElementById('mainOverlay');
+    const secondOverlayElement = document.getElementById('secondOverlay');
+
+    // avoid reacting on clicks on overlays
+    if (mainOverlayElement) {
+      if (!(e.target !== mainOverlayElement && !mainOverlayElement.contains(e.target))) {
+        return
+      }
+    }
+    if (secondOverlayElement) {
+      if (!(e.target !== secondOverlayElement && !secondOverlayElement.contains(e.target))) {
+        console.log("returning2")
+        return
+      }
+    }
+
     const documentSelection = document.getSelection()
+    console.log("new selection:", documentSelection?.type, documentSelection)
     if (documentSelection?.type === "Range") {
+      console.log("selection changed!")
       selection.value = documentSelection
       const text = selection.value.toString();
       console.log("===>", selection.value, text)
@@ -94,8 +135,12 @@ onMounted(() => {
         //console.log("range", selection.value.getRangeAt(0))
         serializedSelection.value = serializeSelection()
         console.log("===>", serializedSelection.value)
-        let rect = selection.value.getRangeAt(0).getBoundingClientRect();
-        console.log("rect", rect)
+        selectionRect.value = selection.value.getRangeAt(0).getBoundingClientRect();
+        console.log("rect", selectionRect.value)
+        viewPort.value = {
+          width: document.body.scrollWidth,
+          height: document.body.scrollHeight
+        }
         // control.style.top = `calc(${rect.top}px - 48px)`;
         // control.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`;
         // control['text']= text;
@@ -113,7 +158,9 @@ const setHtml = async (index: number) => {
     const urlCreator = window.URL || window.webkitURL;
     window.URL.createObjectURL(new Blob([]));
     const newUrl = window.URL.createObjectURL(currentBlob.value);
-    htmlSnapshot.value = sanitizeAsHtml(await currentBlob.value.text());
+    // htmlSnapshot.value = sanitizeAsHtml(await currentBlob.value.text());
+    htmlSnapshot.value = await currentBlob.value.text()
+    //console.log("htmlSnapshot", htmlSnapshot.value)
     //htmlSnapshot.value = await b.text();
 
   }
@@ -126,18 +173,32 @@ watchEffect(async () => {
   if (blobId.value && useUiStore().dbReady) {
     // const tabId = suggestion.value['data' as keyof object]['tabId' as keyof object]
     // console.log("got tabId", tabId)
-    htmls.value = await useSnapshotsService().getMetadataFor(tabId.value, BlobType.HTML)
-    console.log("pngs", htmls.value)
+    metadata.value = await useSnapshotsService().getMetadataFor(tabId.value, BlobType.HTML)
+    console.log("metadata", metadata.value)
 
     const index = route.query['i'] as unknown as number || 0
     currentBlob.value = await useSnapshotsService().getBlobFor(tabId.value, index)
     await setHtml(index)
+
+    current.value = index
+
+    if (metadata.value) {
+      const as = metadata.value[index].annotations || []
+      as.forEach((a: Annotation) => {
+        console.log("found annotation", a)
+        restoreSelection(a.selection)
+        // restoreSelection(JSON.parse(JSON.stringify(a.selection)))
+      })
+      annotations.value = as
+    }
+
+
   }
 })
 
 watchEffect(() => {
   console.log("current", current.value)
-  setHtml(current.value - 1)
+  setHtml(current.value)
 })
 
 const restore = () => {
@@ -146,6 +207,7 @@ const restore = () => {
 }
 
 window.onscroll = function () {
+  scrollX.value = window.scrollX
   scrollY.value = window.scrollY
 };
 
@@ -153,9 +215,33 @@ const mainOverlayStyle = () => {
   return `position:absolute; top:${20 + scrollY.value}px; left:20px; z-index:20000;border:1px solid red;border-radius:3px;max-width:500px`
 }
 const secondOverlayStyle = () => {
-  return `position:absolute; top:${20 + scrollY.value}px; right:20px; z-index:20000;border:1px solid red;border-radius:3px; max-width:200px`
+  const top = -40 + scrollY.value + selectionRect.value['y' as keyof object]
+  // console.log("==>", scrollY.value, selectionRect.value['y' as keyof object], top)
+  const left = -5 + scrollX.value + selectionRect.value['x' as keyof object]
+  // console.log("==>", scrollX.value, selectionRect.value['x' as keyof object], left)
+  return `position:absolute; top:${-20 + top}px; left:${left}px; z-index:20001;border:1px solid grey;border-radius:2px; max-width:200px`
 }
+
+const showAddAnnotationForm = () => {
+  overlayView.value = 'form'
+  // console.log("fixing selection to", serializedSelection.value)
+  fixedSelection.value = serializedSelection.value
+}
+
 const createAnnotation = () => {
-  console.log("createAnnotation", selection.value, selectedText.value, comment.value)
+  useSnapshotsService().createAnnotation(tabId.value || '', current.value, fixedSelection.value, selectedText.value, selectionRect.value, viewPort.value, comment.value)
+  overlayView.value = 'menu'
+  restore()
 }
+
+const restoreAnnotation = (a: Annotation) => {
+  console.log("restoring selection", a.selection)
+  restoreSelection(a.selection)
+}
+
+const deleteAnnotation = (a: Annotation, i:number) => {
+  console.log("deleting selection", a.selection)
+ // useSnapshotsService().deleteAnnotation(tabId.value, i,a)
+}
+
 </script>
