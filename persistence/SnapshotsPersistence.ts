@@ -16,6 +16,8 @@ interface SnapshotsPersistence {
 
   saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
 
+  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
+
   getBlobsForTab(tabId: string): Promise<SavedBlob[]>
 
   getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]>

@@ -32,8 +32,10 @@ export function useSnapshotsService() {
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
     await useSnapshotsStore().saveHTML(id, url, html, remark)
-    // await useSnapshotsStore().saveBlob(id,data)
-    // await useSnapshotsStore().saveMetadata(id,url,type,remark)
+  }
+
+  const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
+    await useSnapshotsStore().savePng(id, url, img, remark)
   }
 
   const getMetadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
@@ -49,7 +51,7 @@ export function useSnapshotsService() {
   }
 
   const deleteBlob = (tabId: string, elementId: string) => {
-    useSnapshotsStore().deleteBlob(tabId, elementId)
+   // useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
   const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined, rect: object, viewport: object, comment: string | undefined) => {
@@ -67,6 +69,7 @@ export function useSnapshotsService() {
     init,
     convertFrom,
     saveHTML,
+    savePng,
     screenshotFrom,
     getMetadataFor,
     deleteBlob,

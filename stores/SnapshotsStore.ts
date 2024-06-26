@@ -28,6 +28,12 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return res
   }
 
+  const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
+    const res = storage.savePng(id, url, img, BlobType.PNG, remark)
+    lastUpdate.value = new Date().getTime()
+    return res
+  }
+
   const metadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
     return storage.getMetadataFor(sourceId, type)
   }
@@ -77,6 +83,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     lastUpdate,
     metadata,
     saveHTML,
+    savePng,
     metadataFor,
     blobFor,
     deleteBlob,
