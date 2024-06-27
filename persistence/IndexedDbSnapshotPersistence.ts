@@ -1,6 +1,5 @@
 import {IDBPDatabase, openDB} from "idb";
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
-import {SavedBlob} from "src/snapshots/models/SavedBlob";
 import _ from "lodash"
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
@@ -55,32 +54,32 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     await this.db.delete('blobs', blobId)
   }
 
-  getBlobs(type: BlobType): Promise<SavedBlob[]> {
-    //  if (!this.db) { // can happen for some reason
-    //   return Promise.resolve([])
-    // }
-    try {
-      console.log("hier", type)
-      return this.db.getAll('blobs')
-        .then((b: any[]) => {
-          console.log("got b", b)
-          const blobs = _.flatten(b)
-          return _.filter(blobs, d => d.type === type)
-        })
-    } catch (ex) {
-      console.log("got error in getBlobs", ex)
-      return Promise.reject("got error in getBlobs")
-    }
-  }
+  // getBlobs(type: BlobType): Promise<SavedBlob[]> {
+  //   //  if (!this.db) { // can happen for some reason
+  //   //   return Promise.resolve([])
+  //   // }
+  //   try {
+  //     console.log("hier", type)
+  //     return this.db.getAll('blobs')
+  //       .then((b: any[]) => {
+  //         console.log("got b", b)
+  //         const blobs = _.flatten(b)
+  //         return _.filter(blobs, d => d.type === type)
+  //       })
+  //   } catch (ex) {
+  //     console.log("got error in getBlobs", ex)
+  //     return Promise.reject("got error in getBlobs")
+  //   }
+  // }
 
-  async getBlobKeys(): Promise<string[]> {
-    let keys = await this.db.getAllKeys('blobs');
-    return _.map(keys, key => key.toString())
-  }
+  // async getBlobKeys(): Promise<string[]> {
+  //   let keys = await this.db.getAllKeys('blobs');
+  //   return _.map(keys, key => key.toString())
+  // }
 
-  getBlobsForTab(tabId: string): Promise<SavedBlob[]> {
-    return this.db.get('blobs', tabId)
-  }
+  // getBlobsForTab(tabId: string): Promise<SavedBlob[]> {
+  //   return this.db.get('blobs', tabId)
+  // }
 
   async getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]> {
     return this.db.get(this.META_STORE_IDENT, sourceId)
@@ -89,29 +88,32 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   // actually not getting a blobMetadata array with simple "getAll", so:
   // https://stackoverflow.com/questions/47931595/indexeddb-getting-all-data-with-keys
   async getMetadata() {
-    // const mds:BlobMetadata[][] = await this.db.getAll(this.META_STORE_IDENT)
-    // console.log("===", mds)
-    // return _.groupBy(mds, )
-    //return mds
+    const result: Map<string, BlobMetadata[]> = new Map()
+    const allKeys = await this.db.getAllKeys(this.META_STORE_IDENT)
+    for (const k of allKeys) {
+      const values = await this.db.get(this.META_STORE_IDENT, k) as BlobMetadata[]
+      result.set(k.toString(), values)
+    }
+    return result;
 
-    const transaction = this.db.transaction([this.META_STORE_IDENT]);
-    const object_store = transaction.objectStore(this.META_STORE_IDENT);
-    const res:Map<string, BlobMetadata[]> = new Map()
-    return object_store.openCursor()
-      .then((cursor: any) => {
-        if (cursor) {
-          let key = cursor.primaryKey;
-          let value = cursor.value;
-          console.log(key, value);
-          res.set(key,value)
-          cursor.continue();
-        }
-        return res
-      })
-      .catch((err: any) => {
-        console.warn("error", err)
-        return res
-      })
+    // const transaction = this.db.transaction([this.META_STORE_IDENT]);
+    // const object_store = transaction.objectStore(this.META_STORE_IDENT);
+    // const res:Map<string, BlobMetadata[]> = new Map()
+    // return object_store.openCursor()
+    //   .then((cursor: any) => {
+    //     if (cursor) {
+    //       let key = cursor.primaryKey;
+    //       let value = cursor.value;
+    //       console.log(key, value);
+    //       res.set(key,value)
+    //       cursor.continue();
+    //     }
+    //     return res
+    //   })
+    //   .catch((err: any) => {
+    //     console.warn("error", err)
+    //     return res
+    //   })
   }
 
   async getBlobFor(sourceId: string, index: number): Promise<Blob> {
@@ -120,19 +122,22 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return await this.db.get(this.BLOBS_STORE_IDENT, md.blobId) as Blob
   }
 
-  async addAnnotation(sourceId: string, index: number, annotation: Annotation) {
+  async addAnnotation(sourceId: string, index: number, annotation: Annotation):Promise<Annotation[]> {
     const res = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
     console.log("adding annotation to ", res, index)
     res[index].annotations ? res[index].annotations.push(annotation) : res[index].annotations = [annotation]
     await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), sourceId)
+    return res[index].annotations
   }
 
-  async deleteAnnotation(sourceId: string, index: number, toDelete: Annotation) {
+  async deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]> {
     const mds = await this.getMetadataFor(sourceId, BlobType.HTML)
+    console.log("mds for ", sourceId, mds)
     const md = mds[index]
-    const annotations = _.filter(md.annotations, (a: Annotation) => a.id !== toDelete.id)
-    md.annotations = annotations
-    // await this.db.put(this.META_STORE_IDENT, [metadata], sourceId)
+    console.log("md to delete", md)
+    md.annotations = _.filter(md.annotations, (a: Annotation) => a.id !== toDelete.id)
+    await this.db.put(this.META_STORE_IDENT, mds, sourceId)
+    return md.annotations
   }
 
   async deleteMetadataForSource (sourceId: string) {
@@ -174,9 +179,10 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     }
   }
 
-  saveBlob(id: string, data: Blob): Promise<any> {
+  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
     return Promise.resolve(undefined);
   }
+
 }
 
 export default new IndexedDbSnapshotsPersistence()

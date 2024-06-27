@@ -13,14 +13,14 @@
         <div class="text-caption">Size {{ Math.round((currentBlob?.size || 0) / 1024) }} kB</div>
       </div>
     </div>
-    <div class="row" v-if="metadata.length > 1">
+    <div class="row" v-if="htmlMetadata.length > 1">
       <div class="col">
         <hr>
         <div class="q-pa-lg">
           <div class="q-gutter-md">
             <q-pagination
               v-model="current"
-              :max="metadata.length"
+              :max="htmlMetadata.length"
               direction-links/>
           </div>
         </div>
@@ -34,13 +34,20 @@
         </div>
         <div class="col-3">
           <q-btn icon="visibility" class="q-ma-none" size="xs" @click="restoreAnnotation(a)"/>
-          <q-btn icon="delete"  class="q-ma-none" size="xs" @click="deleteAnnotation(a, index)"/>
+          <q-btn icon="delete" class="q-ma-none" size="xs" @click="deleteAnnotation(a, index)"/>
         </div>
       </div>
     </template>
+
   </div>
 
-  <div class="q-ma-xs q-pa-xs bg-white" v-if="selectedText" :style="secondOverlayStyle()" id="secondOverlay">
+  <template v-if="annotations.length > 0" v-for="(a,index) in annotations">
+    <div class="bibbly_annotationHint" :style="annotationHintOverlay(a,index)">
+      <q-btn size="xs" icon="west" />
+    </div>
+  </template>
+
+  <div v-if="selectedText" :style="menuOverlayStyle()" class="bibbly_menuOverlay" id="menuOverlay">
     <template v-if="overlayView === 'menu'">
       <div class="text-body2">
         <q-btn icon="o_save" class="q-ma-none q-pa-none" @click="showAddAnnotationForm()">
@@ -81,7 +88,7 @@ const {sanitizeAsHtml, serializeSelection, restoreSelection} = useUtils()
 
 const tabId = ref<string>()
 const blobId = ref<string>()
-const metadata = ref<BlobMetadata[]>([])
+const htmlMetadata = ref<BlobMetadata[]>([])
 const html = ref<BlobMetadata | undefined>(undefined)
 const currentBlob = ref<Blob | undefined>(undefined)
 const current = ref(0)
@@ -101,14 +108,10 @@ const annotations = ref<Annotation[]>([])
 onMounted(() => {
   Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href);
 
-  // document.onselectionchange = () => {
-  //   console.log("===", document.getSelection());
-  // };
-
   document.onpointerup = (e: any) => {
 
     const mainOverlayElement = document.getElementById('mainOverlay');
-    const secondOverlayElement = document.getElementById('secondOverlay');
+    const menuOverlayElement = document.getElementById('menuOverlay');
 
     // avoid reacting on clicks on overlays
     if (mainOverlayElement) {
@@ -116,15 +119,15 @@ onMounted(() => {
         return
       }
     }
-    if (secondOverlayElement) {
-      if (!(e.target !== secondOverlayElement && !secondOverlayElement.contains(e.target))) {
-        console.log("returning2")
+    if (menuOverlayElement) {
+      if (!(e.target !== menuOverlayElement && !menuOverlayElement.contains(e.target))) {
         return
       }
     }
 
     const documentSelection = document.getSelection()
-    console.log("new selection:", documentSelection?.type, documentSelection)
+    //console.log("new selection:", documentSelection?.type, documentSelection)
+    selectedText.value = undefined
     if (documentSelection?.type === "Range") {
       console.log("selection changed!")
       selection.value = documentSelection
@@ -134,9 +137,9 @@ onMounted(() => {
         selectedText.value = text
         //console.log("range", selection.value.getRangeAt(0))
         serializedSelection.value = serializeSelection()
-        console.log("===>", serializedSelection.value)
+        //console.log("===>", serializedSelection.value)
         selectionRect.value = selection.value.getRangeAt(0).getBoundingClientRect();
-        console.log("rect", selectionRect.value)
+        //console.log("rect", selectionRect.value)
         viewPort.value = {
           width: document.body.scrollWidth,
           height: document.body.scrollHeight
@@ -171,10 +174,8 @@ watchEffect(async () => {
   tabId.value = route.params.tabId as string
   blobId.value = route.params.blobId as string
   if (blobId.value && useUiStore().dbReady) {
-    // const tabId = suggestion.value['data' as keyof object]['tabId' as keyof object]
-    // console.log("got tabId", tabId)
-    metadata.value = await useSnapshotsService().getMetadataFor(tabId.value, BlobType.HTML)
-    console.log("metadata", metadata.value)
+    htmlMetadata.value = await useSnapshotsService().getMetadataFor(tabId.value, BlobType.HTML)
+    console.log("metadata", htmlMetadata.value)
 
     const index = route.query['i'] as unknown as number || 0
     currentBlob.value = await useSnapshotsService().getBlobFor(tabId.value, index)
@@ -182,17 +183,24 @@ watchEffect(async () => {
 
     current.value = index
 
-    if (metadata.value) {
-      const as = metadata.value[index].annotations || []
-      as.forEach((a: Annotation) => {
-        console.log("found annotation", a)
-        restoreSelection(a.selection)
-        // restoreSelection(JSON.parse(JSON.stringify(a.selection)))
-      })
-      annotations.value = as
-    }
 
+  }
+})
 
+const setAnnotations = (as: Annotation[]) => {
+  as.forEach((a: Annotation) => {
+    console.log("found annotation", a)
+    restoreSelection(a.selection)
+    // restoreSelection(JSON.parse(JSON.stringify(a.selection)))
+  })
+  annotations.value = as
+}
+
+watchEffect(() => {
+  console.log("===>", current.value, htmlMetadata.value)
+  if (htmlMetadata.value) {
+    const as = htmlMetadata.value[current.value]?.annotations || []
+    setAnnotations(as)
   }
 })
 
@@ -214,12 +222,15 @@ window.onscroll = function () {
 const mainOverlayStyle = () => {
   return `position:absolute; top:${20 + scrollY.value}px; left:20px; z-index:20000;border:1px solid red;border-radius:3px;max-width:500px`
 }
-const secondOverlayStyle = () => {
+const menuOverlayStyle = () => {
   const top = -40 + scrollY.value + selectionRect.value['y' as keyof object]
-  // console.log("==>", scrollY.value, selectionRect.value['y' as keyof object], top)
   const left = -5 + scrollX.value + selectionRect.value['x' as keyof object]
-  // console.log("==>", scrollX.value, selectionRect.value['x' as keyof object], left)
-  return `position:absolute; top:${-20 + top}px; left:${left}px; z-index:20001;border:1px solid grey;border-radius:2px; max-width:200px`
+  return `top:${-20 + top}px; left:${left}px;`
+}
+
+const annotationHintOverlay = (a: Annotation, i: number) => {
+  const top = Math.round(a.rect['y' as keyof object])
+  return `position:absolute; top:${top}px; right:20px; z-index:20002;border:1px solid grey;border-radius:2px`
 }
 
 const showAddAnnotationForm = () => {
@@ -228,8 +239,9 @@ const showAddAnnotationForm = () => {
   fixedSelection.value = serializedSelection.value
 }
 
-const createAnnotation = () => {
-  useSnapshotsService().createAnnotation(tabId.value || '', current.value, fixedSelection.value, selectedText.value, selectionRect.value, viewPort.value, comment.value)
+const createAnnotation = async () => {
+  const as = await useSnapshotsService().createAnnotation(tabId.value || '', current.value, fixedSelection.value, selectedText.value, selectionRect.value, viewPort.value, comment.value)
+  setAnnotations(as)
   overlayView.value = 'menu'
   restore()
 }
@@ -239,9 +251,42 @@ const restoreAnnotation = (a: Annotation) => {
   restoreSelection(a.selection)
 }
 
-const deleteAnnotation = (a: Annotation, i:number) => {
-  console.log("deleting selection", a.selection)
- // useSnapshotsService().deleteAnnotation(tabId.value, i,a)
+const deleteAnnotation = async (a: Annotation, i: number) => {
+  console.log("deleting annotation", a.selection)
+  const remainingAnnotations = await useSnapshotsService().deleteAnnotation(tabId.value!, a, i)
+  setAnnotations(remainingAnnotations)
 }
 
 </script>
+
+<!--<style>-->
+<!--::selection {-->
+<!--  color: red;-->
+<!--  background-color: yellow;-->
+<!--}-->
+
+<!--</style>-->
+
+<style scoped>
+
+.bibbly_menuOverlay {
+  position:absolute;
+  margin:0;
+  padding:5px;
+  background-color:white;
+  min-width:50px;
+  z-index:20001;
+  border:1px solid grey;
+  border-radius:2px;
+}
+
+.bibbly_annotationHint {
+  position:absolute;
+  padding:2px;
+  right:20px;
+  z-index:20002;
+  border:1px solid grey;
+  border-radius:2px;
+  background-color:white;
+}
+</style>

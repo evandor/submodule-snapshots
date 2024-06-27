@@ -54,14 +54,14 @@ export function useSnapshotsService() {
    // useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
-  const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined, rect: object, viewport: object, comment: string | undefined) => {
+  const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined, rect: object, viewport: object, comment: string | undefined): Promise<Annotation[]> => {
     // console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
     const annotation = new Annotation(uid(), selection, text, rect, viewport, comment)
-    useSnapshotsStore().createAnnotation(tabId, index, annotation)
+    return useSnapshotsStore().createAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = (sourceId: string, i:number,a: Annotation ) => {
-    useSnapshotsStore().deleteAnnotation(sourceId, i, a)
+  const deleteAnnotation = (sourceId: string, a: Annotation,i:number ): Promise<Annotation[]> => {
+    return useSnapshotsStore().deleteAnnotation(sourceId, a, i)
   }
 
 

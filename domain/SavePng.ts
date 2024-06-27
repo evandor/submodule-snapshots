@@ -1,11 +1,8 @@
 import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
-import {Tab} from "src/tabsets/models/Tab";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
-import TabsetService from "src/tabsets/services/TabsetService";
 import ContentUtils from "src/core/utils/ContentUtils";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
-import {BlobType} from "src/snapshots/models/BlobMetadata";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 
