@@ -51,7 +51,7 @@ export function useSnapshotsService() {
   }
 
   const deleteBlob = (tabId: string, elementId: string) => {
-   // useSnapshotsStore().deleteBlob(tabId, elementId)
+   //useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
   const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined, rect: object, viewport: object, comment: string | undefined): Promise<Annotation[]> => {
@@ -62,6 +62,10 @@ export function useSnapshotsService() {
 
   const deleteAnnotation = (sourceId: string, a: Annotation,i:number ): Promise<Annotation[]> => {
     return useSnapshotsStore().deleteAnnotation(sourceId, a, i)
+  }
+
+  const deleteSnapshot = (sourceId: string, index:number) => {
+    return useSnapshotsStore().deleteMetadataForSource(sourceId)
   }
 
 
@@ -75,7 +79,8 @@ export function useSnapshotsService() {
     deleteBlob,
     getBlobFor,
     createAnnotation,
-    deleteAnnotation
+    deleteAnnotation,
+    deleteSnapshot
   }
 }
 

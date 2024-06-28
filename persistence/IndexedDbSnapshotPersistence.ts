@@ -122,7 +122,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return await this.db.get(this.BLOBS_STORE_IDENT, md.blobId) as Blob
   }
 
-  async addAnnotation(sourceId: string, index: number, annotation: Annotation):Promise<Annotation[]> {
+  async addAnnotation(sourceId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
     const res = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
     console.log("adding annotation to ", res, index)
     res[index].annotations ? res[index].annotations.push(annotation) : res[index].annotations = [annotation]
@@ -140,8 +140,14 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return md.annotations
   }
 
-  async deleteMetadataForSource (sourceId: string) {
+  async deleteMetadataForSource(sourceId: string) {
     return this.db.delete(this.META_STORE_IDENT, sourceId)
+  }
+
+  async deleteMetadata(sourceId: string, index: number) {
+    const mds: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, sourceId)
+    mds.splice(index, 1)
+    return this.db.put(this.META_STORE_IDENT, mds, sourceId)
   }
 
 
