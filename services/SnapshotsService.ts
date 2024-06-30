@@ -25,6 +25,14 @@ export function useSnapshotsService() {
     return backendApi.createPdf(html)
   }
 
+  const warcFrom = (html: string) => {
+    return backendApi.createWarc(html)
+  }
+
+  // const saveBlob = (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined): Promise<any> => {
+  //   return db.saveBlob(id, url, data, type, remark)
+  // }
+
   // const saveBlob = async (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined) => {
   //   await useSnapshotsStore().saveBlob(id,data)
   //   await useSnapshotsStore().saveMetadata(id,url,type,remark)
@@ -80,7 +88,8 @@ export function useSnapshotsService() {
     getBlobFor,
     createAnnotation,
     deleteAnnotation,
-    deleteSnapshot
+    deleteSnapshot,
+    warcFrom
   }
 }
 
