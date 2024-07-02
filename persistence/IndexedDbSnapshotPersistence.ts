@@ -170,13 +170,22 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
    */
   async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
     const existingMetadata: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, id)
-    //const existingBlob = await this.db.get(this.BLOBS_STORE_IDENT, id)
-
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
-
     const metadata = new BlobMetadata(id, blobId, type, url, remark)
+    if (existingMetadata) {
+      existingMetadata.push(metadata)
+      await this.db.put(this.META_STORE_IDENT, existingMetadata, id)
+    } else {
+      await this.db.put(this.META_STORE_IDENT, [metadata], id)
+    }
+  }
 
+  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
+    const existingMetadata: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, id)
+    const blobId = uid()
+    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+    const metadata = new BlobMetadata(id, blobId, BlobType.MHTML, url, remark)
     if (existingMetadata) {
       existingMetadata.push(metadata)
       await this.db.put(this.META_STORE_IDENT, existingMetadata, id)

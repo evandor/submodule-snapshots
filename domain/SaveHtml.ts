@@ -3,6 +3,7 @@ import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
 import ContentUtils from "src/core/utils/ContentUtils";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService"
+import { WARCRecord, WARCSerializer } from "warcio";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 
@@ -39,6 +40,8 @@ export class SaveHtmlCommand implements Command<any> {
       (res) => {
         console.log("getContent returned result with length", res?.content?.length, this.chromeTab.id)
         if (res && res.content) {
+
+          // TODO this hides stuff!
           let html = ContentUtils.setBaseHref(this.chromeTab.url || '', res.content)
 
           useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)

@@ -112,6 +112,7 @@ const selectionRect = ref<object>({})
 const viewPort = ref<object>({})
 const overlayView = ref('menu')
 const annotations = ref<Annotation[]>([])
+import mhtml2html from 'mhtml2html';
 
 onMounted(() => {
   Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href);
@@ -172,10 +173,23 @@ const setHtml = async (index: number) => {
     //const b: Blob = html.value.content as unknown as Blob
     const urlCreator = window.URL || window.webkitURL;
     window.URL.createObjectURL(new Blob([]));
-    const newUrl = window.URL.createObjectURL(currentBlob.value);
+    //const newUrl = window.URL.createObjectURL(currentBlob.value);
     // htmlSnapshot.value = sanitizeAsHtml(await currentBlob.value.text());
-    htmlSnapshot.value = await currentBlob.value.text()
-    //console.log("htmlSnapshot", htmlSnapshot.value)
+    // htmlSnapshot.value = await currentBlob.value.text()
+    const c = await currentBlob.value.text()
+    //console.log("converting", c)
+    const converted = mhtml2html.convert(c)
+
+    const innerHtml = converted.window.document.documentElement.innerHTML
+    // return Promise.resolve({
+    //   html: innerHtml,
+    //   title: mhtml.title,
+    //   created: mhtml.created
+    // })
+
+
+    htmlSnapshot.value = innerHtml
+    console.log("resulting htmlSnapshot", htmlSnapshot.value)
     //htmlSnapshot.value = await b.text();
 
   }

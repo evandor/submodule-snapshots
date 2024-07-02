@@ -4,6 +4,7 @@ import {Annotation} from "src/snapshots/models/Annotation";
 export enum BlobType {
   PNG = "PNG",
   PDF = "PDF",
+  MHTML = "MHTML",
   HTML = "HTML"
 }
 

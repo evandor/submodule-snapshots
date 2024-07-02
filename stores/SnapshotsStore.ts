@@ -21,9 +21,15 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
   }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined): Promise<any> => {
-    const res = storage.saveHTML(id, url, new Blob([html], {
+    const res = await storage.saveHTML(id, url, new Blob([html], {
       type: 'text/html'
     }), BlobType.HTML, remark)
+    lastUpdate.value = new Date().getTime()
+    return res
+  }
+
+  const saveMHtml = async (id: string, url: string, mhtml: Blob, remark: string | undefined = undefined): Promise<string> => {
+    const res = await storage.saveMHtml(id, url, mhtml, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
@@ -35,11 +41,17 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
   }
 
   const metadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
-    return storage.getMetadataFor(sourceId, type)
+    if (storage) {
+      return storage.getMetadataFor(sourceId, type)
+    }
+    return Promise.resolve([])
   }
 
   const blobFor = (sourceId: string, index: number): Promise<Blob> => {
-    return storage.getBlobFor(sourceId, index)
+    if (storage) {
+      return storage.getBlobFor(sourceId, index)
+    }
+    return Promise.resolve(null as unknown as Blob)
   }
 
   // const saveBlob = async (id: string, data: Blob): Promise<any> => {
@@ -70,7 +82,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return await storage.addAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = async (sourceId: string, toDelete: Annotation,  index: number): Promise<Annotation[]> => {
+  const deleteAnnotation = async (sourceId: string, toDelete: Annotation, index: number): Promise<Annotation[]> => {
     return storage.deleteAnnotation(sourceId, index, toDelete)
   }
 
@@ -83,6 +95,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     lastUpdate,
     metadata,
     saveHTML,
+    saveMHtml,
     savePng,
     metadataFor,
     blobFor,
