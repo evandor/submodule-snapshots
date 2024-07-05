@@ -103,9 +103,10 @@ export function useSnapshotsService() {
    //useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
-  const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined, rect: object, viewport: object, comment: string | undefined): Promise<Annotation[]> => {
+  const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined,
+                            rect: object, viewport: object, title: string, comment: string | undefined): Promise<Annotation[]> => {
     // console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
-    const annotation = new Annotation(uid(), selection, text, rect, viewport, comment)
+    const annotation = new Annotation(uid(), selection, text, rect, viewport, title, comment)
     return useSnapshotsStore().createAnnotation(tabId, index, annotation)
   }
 

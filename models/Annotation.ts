@@ -5,7 +5,8 @@ export class Annotation {
               public text: string | undefined,
               public rect: object,
               public viewport: object,
-              public comment: string | undefined) {
+              public title: string,
+              public comment: string | undefined = undefined) {
   }
 
 }

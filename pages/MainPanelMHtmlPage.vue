@@ -1,15 +1,29 @@
 <template>
 
-  <!--  <iframe :srcdoc="htmlSnapshot" width="100%" height="1000px" />-->
+  <!--      <iframe :srcdoc="iframeSource" width="100%" height="1000px" />-->
 
 
+  <!--  <replay-web-page source="https://replayweb.page/docs/examples/tweet-example.wacz"-->
+  <!--                   url="https://oembed.link/https://twitter.com/webrecorder_io/status/1565881026215219200"></replay-web-page>-->
 
-<!--  <replay-web-page source="https://replayweb.page/docs/examples/tweet-example.wacz"-->
-<!--                   url="https://oembed.link/https://twitter.com/webrecorder_io/status/1565881026215219200"></replay-web-page>-->
+  <!--  <div v-html="htmlSnapshot"></div>-->
 
-  <div v-html="htmlSnapshot"></div>
+  <div style="position: absolute; left: 50%; top:20%">
+    <div style="position: relative; left: -50%; border: dotted red 1px; border-radius:3px">
+
+      <div class="column q-ma-xl q-pa-xl">
+        <div class="col">
+          This is a Snapshot of your Page!
+        </div>
+      </div>
+
+
+    </div>
+  </div>
 
   <div :style="mainOverlayStyle()" class="bibbly_mainOverlay" id="mainOverlay">
+
+
 
     <div class="row">
       <div class="col">
@@ -34,45 +48,33 @@
         <hr>
       </div>
     </div>
-    <template v-if="annotations.length > 0">
-      <div class="row" v-for="(a,index) in annotations">
-        <div class="col-9 ellipsis">
-          {{ a.text }}
-        </div>
-        <div class="col-3">
-          <q-btn icon="visibility" class="q-ma-none" size="xs" @click="restoreAnnotation(a)"/>
-          <q-btn icon="delete" class="q-ma-none" size="xs" @click="deleteAnnotation(a, index)"/>
-        </div>
-      </div>
-    </template>
-
   </div>
 
-  <template v-if="annotations.length > 0" v-for="(a,index) in annotations">
-    <div class="bibbly_annotationHint" :style="annotationHintOverlay(a,index)">
-      <q-btn size="xs" icon="west"/>
-    </div>
-  </template>
+  <!--  <template v-if="annotations.length > 0" v-for="(a,index) in annotations">-->
+  <!--    <div class="bibbly_annotationHint" :style="annotationHintOverlay(a,index)">-->
+  <!--      <q-btn size="xs" icon="west"/>-->
+  <!--    </div>-->
+  <!--  </template>-->
 
-  <div v-if="selectedText" :style="menuOverlayStyle()" class="bibbly_menuOverlay" id="menuOverlay">
-    <template v-if="overlayView === 'menu'">
-      <div class="text-body2">
-        <q-btn icon="o_save" class="q-ma-none q-pa-none" @click="showAddAnnotationForm()">
-          <q-tooltip>Save selection</q-tooltip>
-        </q-btn>
-      </div>
-    </template>
-    <template v-else>
-      <div class="row">
-        <div class="col-8 text-body2">
-          <q-input dense type="text" v-model="comment"/>
-        </div>
-        <div class="col-4 text-body2">
-          <q-btn label="submit" @click="createAnnotation()"/>
-        </div>
-      </div>
-    </template>
-  </div>
+  <!--  <div v-if="selectedText" :style="menuOverlayStyle()" class="bibbly_menuOverlay" id="menuOverlay">-->
+  <!--    <template v-if="overlayView === 'menu'">-->
+  <!--      <div class="text-body2">-->
+  <!--        <q-btn icon="o_save" class="q-ma-none q-pa-none" @click="showAddAnnotationForm()">-->
+  <!--          <q-tooltip>Save selection</q-tooltip>-->
+  <!--        </q-btn>-->
+  <!--      </div>-->
+  <!--    </template>-->
+  <!--    <template v-else>-->
+  <!--      <div class="row">-->
+  <!--        <div class="col-8 text-body2">-->
+  <!--          <q-input dense type="text" v-model="comment"/>-->
+  <!--        </div>-->
+  <!--        <div class="col-4 text-body2">-->
+  <!--          <q-btn label="submit" @click="createAnnotation()"/>-->
+  <!--        </div>-->
+  <!--      </div>-->
+  <!--    </template>-->
+  <!--  </div>-->
 
 
 </template>
@@ -89,10 +91,10 @@ import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
 import {WARCParser} from "warcio";
+import mhtml2html from 'mhtml2html';
 
 const route = useRoute()
-const {sanitizeAsHtml, serializeSelection, restoreSelection} = useUtils()
-
+const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils()
 
 const tabId = ref<string>()
 const blobId = ref(0)
@@ -101,6 +103,7 @@ const html = ref<BlobMetadata | undefined>(undefined)
 const currentBlob = ref<Blob | undefined>(undefined)
 const current = ref(0)
 const htmlSnapshot = ref('loading...')
+const iframeSource = ref('loading...')
 const selectedText = ref<string | undefined>(undefined)
 const selection = ref<any>()
 const fixedSelection = ref<any>()
@@ -112,10 +115,25 @@ const selectionRect = ref<object>({})
 const viewPort = ref<object>({})
 const overlayView = ref('menu')
 const annotations = ref<Annotation[]>([])
-import mhtml2html from 'mhtml2html';
 
 onMounted(() => {
   Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href);
+
+  // document.onmousedown = (e: any) => {
+  //   alert("hier")
+
+
+  // document.addEventListener('DOMContentLoaded', function () {
+  //   alert("1")
+  //   console.log('The page has loaded!');
+  //   // Your code goes here
+  // });
+  //
+  // window.addEventListener('load', function () {
+  //   alert("2")
+  //   console.log('The page fully loaded, including all dependent resources!');
+  //   // Your code goes here
+  // });
 
   document.onpointerup = (e: any) => {
 
@@ -153,6 +171,12 @@ onMounted(() => {
           width: document.body.scrollWidth,
           height: document.body.scrollHeight
         }
+        sendMsg('text-selection', {
+          text: selectedText.value,
+          selection: serializedSelection.value,
+          rect: selectionRect.value,
+          viewPort: viewPort.value
+        })
         // control.style.top = `calc(${rect.top}px - 48px)`;
         // control.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`;
         // control['text']= text;
@@ -161,6 +185,23 @@ onMounted(() => {
     }
   }
 })
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.name === "restore-selection") {
+    restoreSelection(message.data.selection)
+  }
+  sendResponse("done")
+  return true
+})
+
+
+// onMessage(request: any, sender: chrome.runtime.MessageSender, sendResponse: any) {
+//   console.log("tabsets: ===>", request)
+//   if (inIgnoredMessages(request)) {
+//     return true
+//   }
+//   console.debug(" <<< got message in ChromeListeners", request)
+// })
 
 // const iframeSource = () => {
 //   return "data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%3Efoo%3C/body%3E%3C/html%3E"
@@ -180,6 +221,20 @@ const setHtml = async (index: number) => {
     //console.log("converting", c)
     const converted = mhtml2html.convert(c)
 
+
+    //htmlSnapshot.value = await currentBlob.value.text()
+
+    const css = converted.window.document.createElement('style');
+    // // my_awesome_script.setAttribute('src','http://example.com/site.js');
+    // my_awesome_script.text = "document.onpointerup = (e: any) => {alert(document.selection)}"
+    css.type = 'text/css';
+    css.appendChild(converted.window.document.createTextNode("::selection {\n" +
+      "  color: red;\n" +
+      "  background: yellow;\n" +
+      "}"));
+    converted.window.document.head.appendChild(css);
+
+
     const innerHtml = converted.window.document.documentElement.innerHTML
     // return Promise.resolve({
     //   html: innerHtml,
@@ -191,6 +246,30 @@ const setHtml = async (index: number) => {
     htmlSnapshot.value = innerHtml
     console.log("resulting htmlSnapshot", htmlSnapshot.value)
     //htmlSnapshot.value = await b.text();
+
+    const html = htmlSnapshot.value
+
+    setTimeout(() => {
+      document.documentElement.innerHTML = html
+
+      // const my_awesome_script = document.createElement('script');
+      // //
+      // // // my_awesome_script.setAttribute('src','http://example.com/site.js');
+      // // my_awesome_script.text = "document.onpointerup = (e: any) => {alert(document.selection)}"
+      // my_awesome_script.text = "alert('hi')"
+      // //
+      // // document.head.appendChild(my_awesome_script);
+      // document.body.appendChild(my_awesome_script);
+    }, 1000)
+
+
+    // iframeSource.value = html
+
+    // var iframe = document.createElement('iframe');
+    // document.body.appendChild(iframe);
+    // iframe.contentWindow!.document.open();
+    // iframe.contentWindow!.document.write(html);
+    // iframe.contentWindow!.document.close();
 
   }
 
@@ -215,30 +294,30 @@ watchEffect(async () => {
       current.value = index
 
 
-      async function readWARC(url:string) {
-        const response = await fetch(url);
-console.log("response body", response.body)
-        const parser = new WARCParser(response.body!);
-
-        for await (const record of parser) {
-          // ways to access warc data
-          // console.log(record.warcType);
-          // console.log(record.warcTargetURI);
-          // console.log(record.warcHeader("WARC-Target-URI"));
-          // console.log(record.warcHeaders.headers.get("WARC-Record-ID"));
-
-          // iterator over WARC content one chunk at a time (as Uint8Array)
-          // for await (const chunk of record) {
-          //   console.log("chunk", chunk)
-          // }
-
-          // access content as text
-          const text = await record.contentText();
-          console.log("text", text)
-        }
-      }
-
-      await readWARC("https://firebasestorage.googleapis.com/v0/b/bibbly-dev.appspot.com/o/users%2Fx701JPs6dye8p8sLMxxXF8ONr9B2%2FsnapshotBlobs%2F3caba87e-cdb9-4508-87f5-ebbc2639586f?alt=media&token=d8e7b3d6-165d-4aa3-a34a-09209fd42576");
+//       async function readWARC(url: string) {
+//         const response = await fetch(url);
+// // console.log("response body", response.body)
+//         const parser = new WARCParser(response.body!);
+//
+//         for await (const record of parser) {
+//           // ways to access warc data
+//           // console.log(record.warcType);
+//           // console.log(record.warcTargetURI);
+//           // console.log(record.warcHeader("WARC-Target-URI"));
+//           // console.log(record.warcHeaders.headers.get("WARC-Record-ID"));
+//
+//           // iterator over WARC content one chunk at a time (as Uint8Array)
+//           // for await (const chunk of record) {
+//           //   console.log("chunk", chunk)
+//           // }
+//
+//           // access content as text
+//           const text = await record.contentText();
+//           console.log("text", text)
+//         }
+//       }
+//
+//       await readWARC("https://firebasestorage.googleapis.com/v0/b/bibbly-dev.appspot.com/o/users%2Fx701JPs6dye8p8sLMxxXF8ONr9B2%2FsnapshotBlobs%2F3caba87e-cdb9-4508-87f5-ebbc2639586f?alt=media&token=d8e7b3d6-165d-4aa3-a34a-09209fd42576");
     }
   }
 })
@@ -358,4 +437,10 @@ const deleteAnnotation = async (a: Annotation, i: number) => {
   border-radius: 2px;
   background-color: white;
 }
+
+::selection {
+  color: red;
+  background: yellow;
+}
+
 </style>
