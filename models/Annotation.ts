@@ -6,7 +6,8 @@ export class Annotation {
               public rect: object,
               public viewport: object,
               public title: string,
-              public comment: string | undefined = undefined) {
+              public comment: string | undefined = undefined,
+              public color: string = 'grey') {
   }
 
 }

@@ -23,6 +23,8 @@ interface SnapshotsPersistence {
 
   addAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]>
 
+  updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]>
+
   compactDb(): Promise<any>
 
   clear(name: string): void

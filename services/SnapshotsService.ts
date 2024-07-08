@@ -49,7 +49,7 @@ export function useSnapshotsService() {
     const filename = "sample.warc";
 
     const warcinfo = await WARCRecord.createWARCInfo(
-      { filename, warcVersion },
+      {filename, warcVersion},
       info
     );
 
@@ -70,7 +70,7 @@ export function useSnapshotsService() {
     }
 
     const record = await WARCRecord.create(
-      { url: url2, date, type, warcVersion, httpHeaders },
+      {url: url2, date, type, warcVersion, httpHeaders},
       content()
     );
 
@@ -100,21 +100,28 @@ export function useSnapshotsService() {
   }
 
   const deleteBlob = (tabId: string, elementId: string) => {
-   //useSnapshotsStore().deleteBlob(tabId, elementId)
+    //useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
-  const createAnnotation = (tabId: string, index:number, selection: any, text: string | undefined,
-                            rect: object, viewport: object, title: string, comment: string | undefined): Promise<Annotation[]> => {
+  const createAnnotation = (tabId: string, index: number, selection: any, text: string | undefined,
+                            rect: object, viewport: object, title: string,
+                            comment: string | undefined,
+                            color: string = 'grey'): Promise<Annotation[]> => {
     // console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
-    const annotation = new Annotation(uid(), selection, text, rect, viewport, title, comment)
+    const annotation = new Annotation(uid(), selection, text, rect, viewport, title, comment, color)
     return useSnapshotsStore().createAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = (sourceId: string, a: Annotation,i:number ): Promise<Annotation[]> => {
+  const updateAnnotation = (tabId: string, annotation: Annotation, index: number): Promise<Annotation[]> => {
+    console.log("updateAnnotation", tabId, index, annotation, index)
+    return useSnapshotsStore().updateAnnotation(tabId, index, annotation)
+  }
+
+  const deleteAnnotation = (sourceId: string, a: Annotation, i: number): Promise<Annotation[]> => {
     return useSnapshotsStore().deleteAnnotation(sourceId, a, i)
   }
 
-  const deleteSnapshot = (sourceId: string, index:number) => {
+  const deleteSnapshot = (sourceId: string, index: number) => {
     return useSnapshotsStore().deleteMetadataForSource(sourceId)
   }
 
@@ -129,6 +136,7 @@ export function useSnapshotsService() {
     deleteBlob,
     getBlobFor,
     createAnnotation,
+    updateAnnotation,
     deleteAnnotation,
     deleteSnapshot,
     warcFrom

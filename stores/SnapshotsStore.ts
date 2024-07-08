@@ -75,11 +75,11 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
   }
 
   const createAnnotation = async (tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> => {
-    //console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
-    //useSnapshotsStore().createAnnotation(tabId, tabId, index, selection, text, rect, viewport, comment)
-    // const annotation = new Annotation(tabId, selection)
-    console.log("annotation", annotation)
     return await storage.addAnnotation(tabId, index, annotation)
+  }
+
+  const updateAnnotation = async (tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> => {
+    return await storage.updateAnnotation(tabId, index, annotation)
   }
 
   const deleteAnnotation = async (sourceId: string, toDelete: Annotation, index: number): Promise<Annotation[]> => {
@@ -101,6 +101,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     blobFor,
     deleteBlob,
     createAnnotation,
+    updateAnnotation,
     deleteAnnotation,
     deleteMetadataForSource
   }

@@ -130,6 +130,21 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return res[index].annotations
   }
 
+  async updateAnnotation(sourceId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
+    const res = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
+    console.log("updating annotation", res, index)
+    if (res[index].annotations) {
+      const annotationIndex = _.findIndex(res[index].annotations, {id: annotation.id})
+      if (annotationIndex >= 0) {
+        res[index].annotations[annotationIndex] = annotation
+      }
+    } else {
+      throw new Error("annotation not found")
+    }
+    await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), sourceId)
+    return res[index].annotations
+  }
+
   async deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]> {
     const mds = await this.getMetadataFor(sourceId, BlobType.HTML)
     console.log("mds for ", sourceId, mds)
