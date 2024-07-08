@@ -127,7 +127,7 @@ onMounted(() => {
         //console.log("rect", selectionRect.value)
         viewPort.value = {
           width: document.body.scrollWidth,
-          height: document.body.scrollHeight
+          height: document.body.scrollHeight// + document.body.scrollY
         }
         sendMsg('text-selection', {
           text: selectedText.value,
