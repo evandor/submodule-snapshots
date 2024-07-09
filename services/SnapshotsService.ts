@@ -3,7 +3,6 @@ import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {uid} from "quasar";
-import {WARCRecord, WARCSerializer} from "warcio";
 
 //let db: SnapshotsPersistence = null as unknown as SnapshotsPersistence
 
@@ -48,6 +47,7 @@ export function useSnapshotsService() {
     };
     const filename = "sample.warc";
 
+/*
     const warcinfo = await WARCRecord.createWARCInfo(
       {filename, warcVersion},
       info
@@ -75,12 +75,13 @@ export function useSnapshotsService() {
     );
 
     const serializedRecord = await WARCSerializer.serialize(record);
+*/
 
     // console.log(new TextDecoder().decode(serializedWARCInfo));
     // console.log(new TextDecoder().decode(serializedRecord));
 
-    //await useSnapshotsStore().saveHTML(id, url, html, remark)
-    await useSnapshotsStore().saveHTML(id, url, new TextDecoder().decode(serializedRecord), remark)
+    await useSnapshotsStore().saveHTML(id, url, html, remark)
+    //await useSnapshotsStore().saveHTML(id, url, new TextDecoder().decode(serializedRecord), remark)
   }
 
   const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {

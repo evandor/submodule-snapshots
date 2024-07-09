@@ -88,7 +88,6 @@ import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
-import {WARCParser} from "warcio";
 
 const route = useRoute()
 const {sanitizeAsHtml, serializeSelection, restoreSelection} = useUtils()
@@ -201,31 +200,31 @@ watchEffect(async () => {
       current.value = index
 
 
-      async function readWARC(url:string) {
-        const response = await fetch(url);
-console.log("response body", response.body)
-        const parser = new WARCParser(response.body!);
-
-        for await (const record of parser) {
-          // ways to access warc data
-          // console.log(record.warcType);
-          // console.log(record.warcTargetURI);
-          // console.log(record.warcHeader("WARC-Target-URI"));
-          // console.log(record.warcHeaders.headers.get("WARC-Record-ID"));
-
-          // iterator over WARC content one chunk at a time (as Uint8Array)
-          // for await (const chunk of record) {
-          //   console.log("chunk", chunk)
-          // }
-
-          // access content as text
-          const text = await record.contentText();
-          console.log("text", text)
-        }
-      }
-
-      await readWARC("https://firebasestorage.googleapis.com/v0/b/bibbly-dev.appspot.com/o/users%2Fx701JPs6dye8p8sLMxxXF8ONr9B2%2FsnapshotBlobs%2F3caba87e-cdb9-4508-87f5-ebbc2639586f?alt=media&token=d8e7b3d6-165d-4aa3-a34a-09209fd42576");
-    }
+//       async function readWARC(url:string) {
+//         const response = await fetch(url);
+// console.log("response body", response.body)
+//         const parser = new WARCParser(response.body!);
+//
+//         for await (const record of parser) {
+//           // ways to access warc data
+//           // console.log(record.warcType);
+//           // console.log(record.warcTargetURI);
+//           // console.log(record.warcHeader("WARC-Target-URI"));
+//           // console.log(record.warcHeaders.headers.get("WARC-Record-ID"));
+//
+//           // iterator over WARC content one chunk at a time (as Uint8Array)
+//           // for await (const chunk of record) {
+//           //   console.log("chunk", chunk)
+//           // }
+//
+//           // access content as text
+//           const text = await record.contentText();
+//           console.log("text", text)
+//         }
+//       }
+//
+//       await readWARC("https://firebasestorage.googleapis.com/v0/b/bibbly-dev.appspot.com/o/users%2Fx701JPs6dye8p8sLMxxXF8ONr9B2%2FsnapshotBlobs%2F3caba87e-cdb9-4508-87f5-ebbc2639586f?alt=media&token=d8e7b3d6-165d-4aa3-a34a-09209fd42576");
+     }
   }
 })
 

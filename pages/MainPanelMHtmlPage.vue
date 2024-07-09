@@ -183,7 +183,17 @@ const setHtml = async (index: number) => {
     overlayBtn.type = "button"
     overlayBtn.innerText = "Edit"
 
+    // const overlayScript = converted.window.document.createElement('script')
+    // overlayScript.onload = function() {
+    //   alert("Script loaded and ready");
+    // };
+    // overlayScript.src = "chrome-extension://pndffocijjfpmphlhkoijmpfckjafdpl/www/js/my-content-script.js";
+    // overlayScript.execute
+    // converted.window.document.body.appendChild(overlayScript)
+
+
     overlayDiv.appendChild(overlayImg)
+
     //overlayDiv.appendChild(overlayBtn)
 
     converted.window.document.body.appendChild(overlayDiv)
@@ -197,19 +207,8 @@ const setHtml = async (index: number) => {
     // });
 
 
-    const innerHtml = $.html()
-    // return Promise.resolve({
-    //   html: innerHtml,
-    //   title: mhtml.title,
-    //   created: mhtml.created
-    // })
-
-
-    htmlSnapshot.value = innerHtml
-    console.log("resulting htmlSnapshot", htmlSnapshot.value)
-    //htmlSnapshot.value = await b.text();
-
-    const html = htmlSnapshot.value
+    htmlSnapshot.value = $.html()
+    //console.log("resulting htmlSnapshot", htmlSnapshot.value)
 
     if (proceedToPage.value) {
       setTimeout(() => {
