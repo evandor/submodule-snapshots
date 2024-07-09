@@ -26,7 +26,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
 
   private async initDatabase(): Promise<IDBPDatabase> {
     const ctx = this
-    return await openDB("BlobsDB", 1, {
+    return await openDB("SnapshotsDB", 1, {
       upgrade(db) {
         if (!db.objectStoreNames.contains(ctx.BLOBS_STORE_IDENT)) {
           console.log("creating db " + ctx.BLOBS_STORE_IDENT)
