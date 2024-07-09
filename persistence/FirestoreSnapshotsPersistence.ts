@@ -8,8 +8,21 @@ import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
 import {useTabsetsStore} from "src/tabsets/stores/tabsetsStore";
 import {ref, uploadBytes,getDownloadURL,getBlob} from "firebase/storage";
-import {Tabset} from "src/tabsets/models/Tabset";
-import {UserData} from "src/models/Account";
+import firebase from "firebase/compat";
+import Blob = firebase.firestore.Blob;
+import * as console from "node:console";
+import {index} from "cheerio/lib/api/traversing";
+import * as console from "node:console";
+import {ref} from "vue";
+import * as console from "node:console";
+import * as console from "node:console";
+import * as console from "node:console";
+import Blob = firebase.firestore.Blob;
+import * as console from "node:console";
+import * as console from "node:console";
+import * as url from "node:url";
+import Blob = firebase.firestore.Blob;
+import Blob = firebase.firestore.Blob;
 
 const STORE_IDENT = 'snapshotmetadata';
 const BLOB_IDENT = 'snapshotblobs';
@@ -143,6 +156,10 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
 
   savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
     return Promise.reject("savePng failed");
+  }
+
+  updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
+    return Promise.resolve([]);
   }
 
 

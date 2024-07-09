@@ -10,7 +10,7 @@ export class SavePngCommand implements Command<string> {
   }
 
   async execute(): Promise<ExecutionResult<string>> {
-
+    console.log("executing save png command");
     return chrome.tabs.query({currentWindow: true})
       .then((tabs: chrome.tabs.Tab[]) => {
         const tabCandidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === this.url)
