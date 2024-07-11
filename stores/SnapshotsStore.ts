@@ -8,7 +8,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
 
   let storage: SnapshotsPersistence = null as unknown as SnapshotsPersistence
 
-  const metadata = ref<Map<string, BlobMetadata[]>>(new Map())
+  const metadata = ref<BlobMetadata[]>([])
 
   const lastUpdate = ref(0)
 
@@ -40,33 +40,26 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return res
   }
 
-  const metadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
+  const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
+    const res = storage.savePdf(id, url, img, BlobType.PDF, remark)
+    lastUpdate.value = new Date().getTime()
+    return res
+  }
+
+  const metadataFor = (sourceId: string): Promise<BlobMetadata[]> => {
     if (storage) {
-      return storage.getMetadataFor(sourceId, type)
+      return storage.getMetadataFor(sourceId)
     }
     return Promise.resolve([])
   }
 
-  const blobFor = (sourceId: string, index: number): Promise<Blob> => {
-    if (storage) {
-      return storage.getBlobFor(sourceId, index)
-    }
-    return Promise.resolve(null as unknown as Blob)
+  const metadataById = (id: string): Promise<BlobMetadata> => {
+    return storage.getMetadataById(id)
   }
 
-  // const saveBlob = async (id: string, data: Blob): Promise<any> => {
-  //   console.log(`saving blob for id ${id}`)
-  //   const res = await storage.saveBlob(id, data)
-  //   lastUpdate.value = new Date().getTime()
-  //   return res
-  // }
-  //
-  // const saveMetadata = async (id: string, url: string, type: BlobType, remark: string | undefined = undefined): Promise<any> => {
-  //   console.log(`saving blob for id ${id}, url=${url}`)
-  //   const res = await storage.saveMetadata(id, url, type, remark)
-  //   lastUpdate.value = new Date().getTime()
-  //   return res
-  // }
+  const blobFor = (id: string): Promise<Blob> => {
+      return storage.getBlobFor(id)
+  }
 
   const deleteBlob = async (blobId: string) => {
     console.log("deleting blob", blobId)
@@ -74,8 +67,8 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     lastUpdate.value = new Date().getTime()
   }
 
-  const createAnnotation = async (tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> => {
-    return await storage.addAnnotation(tabId, index, annotation)
+  const createAnnotation = async (snapshotId: string, annotation: Annotation): Promise<Annotation[]> => {
+    return await storage.addAnnotation(snapshotId, annotation)
   }
 
   const updateAnnotation = async (tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> => {
@@ -86,8 +79,9 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return storage.deleteAnnotation(sourceId, index, toDelete)
   }
 
-  const deleteMetadataForSource = (sourceId: string) => {
-    storage.deleteMetadataForSource(sourceId)
+  const deleteMetadataForSource = (snapshotId: string) => {
+    storage.deleteMetadataForSource(snapshotId)
+    lastUpdate.value = new Date().getTime()
   }
 
   return {
@@ -97,7 +91,9 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     saveHTML,
     saveMHtml,
     savePng,
+    savePdf,
     metadataFor,
+    metadataById,
     blobFor,
     deleteBlob,
     createAnnotation,

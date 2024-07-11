@@ -7,33 +7,46 @@ interface SnapshotsPersistence {
 
   init(): Promise<any>
 
+  // --- create new stuff ---
   saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
 
-  saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any>
+  // ok (indexeddb)
+  saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<string>
 
+  // ok (indexeddb)
   savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
 
-  getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]>
+  // ok (indexeddb)
+  savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
 
-  getMetadata(): Promise<Map<string, BlobMetadata[]>>
+  // --- metadata ---
+  getMetadataFor(sourceId: string): Promise<BlobMetadata[]>
 
-  getBlobFor(sourceId: string, index:number): Promise<Blob>
+  // ok (indexeddb)
+  getMetadataById(id: string): Promise<BlobMetadata>
+
+  getMetadata(): Promise<BlobMetadata[]>
+
+  deleteMetadataForSource(snapshotId: string):void
+
+  //deleteMetadata(sourceId: string, index:number):void
+
+  // --- blobs ---
+  getBlobFor(id: string): Promise<Blob>
 
   deleteBlob(blobId: string): void;
 
-  addAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]>
+  // --- annotations ---
+  addAnnotation(snapshotId: string, annotation: Annotation): Promise<Annotation[]>
 
   updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]>
 
+  deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]>;
+
+  // --- stuff ---
   compactDb(): Promise<any>
 
   clear(name: string): void
-
-  deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]>;
-
-  deleteMetadataForSource(sourceId: string):void
-
-  deleteMetadata(sourceId: string, index:number):void
 
 }
 

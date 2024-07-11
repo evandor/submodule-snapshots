@@ -1,4 +1,3 @@
-import {uid} from "quasar";
 import {Annotation} from "src/snapshots/models/Annotation";
 
 export enum BlobType {
@@ -9,18 +8,18 @@ export enum BlobType {
 }
 
 export class BlobMetadata {
+
   created: number
-  _id: string;
 
   constructor(
-    public sourceId: string,
-    public blobId: string,
+    public id: string, // internal id
+    public sourceId: string, // e.g. tab id
+    public blobId: string, // the referenced blob id
     public type: BlobType,
     public url: string,
     public remark: string | undefined = undefined,
     public annotations: Annotation[] = []) {
     this.created = new Date().getTime()
-    this._id = uid()
   }
 
 }

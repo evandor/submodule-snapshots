@@ -6,10 +6,13 @@
         <div class="col-xs-12 col-md-5">
           <q-toolbar-title class="q-mb-lg">
             <div class="row justify-start items-baseline">
-              <div class="col-1"><span class="text-dark">Archived PDF for: {{ pdf }}</span></div>
+              <div class="col-1">
+                <span v-if="htmlMetadata" class="text-dark">Archived PDF for: {{ htmlMetadata.url }}</span>
+                <span v-else class="text-dark">Archived PDF for: <q-spinner-facebook color="primary"
+                                                                                       size="1em"/></span>
+              </div>
             </div>
-            <div class="text-caption">Created  date.formatDate(pdf?.created, 'DD.MM.YYYY HH:mm') </div>
-            <div class="text-caption">Size {{ Math.round((pdf?.content.size || 0) / 1024) }} kB</div>
+            <div class="text-caption">Created {{ date.formatDate(htmlMetadata?.created, 'DD.MM.YYYY HH:mm') }}</div>
           </q-toolbar-title>
         </div>
         <div class="col-xs-12 col-md-7 text-right">
@@ -26,23 +29,6 @@
         </div>
       </div>
     </q-toolbar>
-
-    <div class="row">
-      <div class="col">
-        <hr>
-        <div class="q-pa-lg">
-          <div class="q-gutter-md">
-            <q-pagination
-              v-model="current"
-              :max="pdfs.length"
-              direction-links/>
-
-
-          </div>
-        </div>
-        <hr>
-      </div>
-    </div>
 
     <object :data="pdfData" type="application/pdf" width="100%" :height="heightFromViewport()">
       <p>Unable to display PDF file.</p>
@@ -63,9 +49,14 @@ import Analytics from "src/core/utils/google-analytics";
 
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import {SavedBlob} from "src/snapshots/models/SavedBlob";
+import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
+import {BlobMetadata} from "src/snapshots/models/BlobMetadata";
 
 const route = useRoute()
 
+const snapshotId = ref<string>()
+const htmlMetadata = ref<BlobMetadata | undefined>(undefined)
+const currentBlob = ref<Blob | undefined>(undefined)
 const tabId = ref<string>()
 const blobId = ref<string>()
 const pdfs = ref<SavedBlob[]>([])
@@ -77,20 +68,30 @@ onMounted(() => {
   Analytics.firePageViewEvent('MainPanelPdfPage', document.location.href);
 })
 
+watchEffect(async () => {
+  snapshotId.value = route.params.snapshotId as string
+  console.log(`got snapshotId ${snapshotId.value}`)
+})
+
 function setImage(index: number) {
-  //png.value = _.first(_.filter(pngs.value, (p:SavedBlob) => p.id === blobId.value))
-  pdf.value = pdfs.value[index]
-  if (!pdf.value) {
+  if (!currentBlob.value) {
     return
   }
   var urlCreator = window.URL || window.webkitURL;
-  pdfData.value = urlCreator.createObjectURL(pdf.value.content);
-  // const img1: HTMLImageElement | null = document.querySelector("#monitoringStartImg")
-  // if (img1) {
-  //   img1.src = imageUrl;
-  // }
-
+  pdfData.value = urlCreator.createObjectURL(currentBlob.value);
 }
+
+watchEffect(async () => {
+  if (snapshotId.value) {
+    if (useSnapshotsStore().lastUpdate) {
+      htmlMetadata.value = await useSnapshotsService().getMetadataById(snapshotId.value)
+      console.log("metadata", htmlMetadata.value)
+      currentBlob.value = await useSnapshotsService().getBlobFor(htmlMetadata.value.blobId)
+      await setImage(0)
+      //current.value = index
+    }
+  }
+})
 
 watchEffect(async () => {
   tabId.value = route.params.tabId as string

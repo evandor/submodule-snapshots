@@ -88,29 +88,42 @@ export function useSnapshotsService() {
     await useSnapshotsStore().savePng(id, url, img, remark)
   }
 
+  const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
+    await useSnapshotsStore().savePdf(id, url, img, remark)
+  }
+
   const getMetadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
     return useSnapshotsStore().metadataFor(sourceId, type)
   }
 
-  const getBlobFor = (sourceId: string, index: number): Promise<Blob> => {
-    return useSnapshotsStore().blobFor(sourceId, index)
+  const getMetadataById = (id: string): Promise<BlobMetadata> => {
+    console.log("getMetadataById", id)
+    return useSnapshotsStore().metadataById(id)
+  }
+
+  const getBlobFor = (id: string): Promise<Blob> => {
+    return useSnapshotsStore().blobFor(id)
   }
 
   const screenshotFrom = (html: string) => {
     return backendApi.createPng(html)
   }
 
+  const pdfFrom = (html: string) => {
+    return backendApi.createPdf(html)
+  }
+
   const deleteBlob = (tabId: string, elementId: string) => {
     //useSnapshotsStore().deleteBlob(tabId, elementId)
   }
 
-  const createAnnotation = (tabId: string, index: number, selection: any, text: string | undefined,
+  const createAnnotation = (snapshotId: string, selection: any, text: string | undefined,
                             rect: object, viewport: object, title: string,
                             comment: string | undefined,
                             color: string = 'grey'): Promise<Annotation[]> => {
     // console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
     const annotation = new Annotation(uid(), selection, text, rect, viewport, title, comment, color)
-    return useSnapshotsStore().createAnnotation(tabId, index, annotation)
+    return useSnapshotsStore().createAnnotation(snapshotId, annotation)
   }
 
   const updateAnnotation = (tabId: string, annotation: Annotation, index: number): Promise<Annotation[]> => {
@@ -122,8 +135,8 @@ export function useSnapshotsService() {
     return useSnapshotsStore().deleteAnnotation(sourceId, a, i)
   }
 
-  const deleteSnapshot = (sourceId: string, index: number) => {
-    return useSnapshotsStore().deleteMetadataForSource(sourceId)
+  const deleteSnapshot = (snapshotId: string) => {
+    return useSnapshotsStore().deleteMetadataForSource(snapshotId)
   }
 
 
@@ -132,8 +145,11 @@ export function useSnapshotsService() {
     convertFrom,
     saveHTML,
     savePng,
+    savePdf,
     screenshotFrom,
+    pdfFrom,
     getMetadataFor,
+    getMetadataById,
     deleteBlob,
     getBlobFor,
     createAnnotation,
@@ -143,24 +159,3 @@ export function useSnapshotsService() {
     warcFrom
   }
 }
-
-// class SnapshotsService {
-//
-//     saveBlob(tab: Tab, data: Blob, type: BlobType, remark: string | undefined = undefined): Promise<any> {
-//         return snapshotsIndexedDb.saveBlob(tab.id, tab.url || '', data, type, remark)
-//     }
-//
-//     getPdfs() {
-//         return snapshotsIndexedDb.getBlobs(BlobType.PDF)
-//     }
-//
-//     getPngs() {
-//         return snapshotsIndexedDb.getBlobs(BlobType.PNG)
-//     }
-//
-//
-//
-//
-// }
-//
-// export default new SnapshotsService();

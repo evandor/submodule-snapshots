@@ -12,8 +12,6 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   private BLOBS_STORE_IDENT = 'blobs';
   private META_STORE_IDENT = 'metadata';
 
-  // private ANNOTATION_STORE_IDENT = 'annotations';
-
   getServiceName(): string {
     return this.constructor.name
   }
@@ -26,7 +24,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
 
   private async initDatabase(): Promise<IDBPDatabase> {
     const ctx = this
-    return await openDB("SnapshotsDB", 1, {
+    return await openDB("snapshotsDB", 1, {
       upgrade(db) {
         if (!db.objectStoreNames.contains(ctx.BLOBS_STORE_IDENT)) {
           console.log("creating db " + ctx.BLOBS_STORE_IDENT)
@@ -34,7 +32,8 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
         }
         if (!db.objectStoreNames.contains(ctx.META_STORE_IDENT)) {
           console.log("creating db " + ctx.META_STORE_IDENT)
-          db.createObjectStore(ctx.META_STORE_IDENT);
+          const store = db.createObjectStore(ctx.META_STORE_IDENT);
+          store.createIndex("sourceId", "sourceId", {unique: false});
         }
       }
     });
@@ -54,80 +53,38 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     await this.db.delete('blobs', blobId)
   }
 
-  // getBlobs(type: BlobType): Promise<SavedBlob[]> {
-  //   //  if (!this.db) { // can happen for some reason
-  //   //   return Promise.resolve([])
-  //   // }
-  //   try {
-  //     console.log("hier", type)
-  //     return this.db.getAll('blobs')
-  //       .then((b: any[]) => {
-  //         console.log("got b", b)
-  //         const blobs = _.flatten(b)
-  //         return _.filter(blobs, d => d.type === type)
-  //       })
-  //   } catch (ex) {
-  //     console.log("got error in getBlobs", ex)
-  //     return Promise.reject("got error in getBlobs")
-  //   }
-  // }
+  async getMetadataFor(sourceId: string): Promise<BlobMetadata[]> {
+    return this.db.getAllFromIndex(this.META_STORE_IDENT, 'sourceId', sourceId)
+  }
 
-  // async getBlobKeys(): Promise<string[]> {
-  //   let keys = await this.db.getAllKeys('blobs');
-  //   return _.map(keys, key => key.toString())
-  // }
-
-  // getBlobsForTab(tabId: string): Promise<SavedBlob[]> {
-  //   return this.db.get('blobs', tabId)
-  // }
-
-  async getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]> {
-    return this.db.get(this.META_STORE_IDENT, sourceId)
+  async getMetadataById(id: string): Promise<BlobMetadata> {
+    return this.db.get(this.META_STORE_IDENT, id)
   }
 
   // actually not getting a blobMetadata array with simple "getAll", so:
   // https://stackoverflow.com/questions/47931595/indexeddb-getting-all-data-with-keys
   async getMetadata() {
-    const result: Map<string, BlobMetadata[]> = new Map()
-    const allKeys = await this.db.getAllKeys(this.META_STORE_IDENT)
-    for (const k of allKeys) {
-      const values = await this.db.get(this.META_STORE_IDENT, k) as BlobMetadata[]
-      result.set(k.toString(), values)
-    }
-    return result;
-
-    // const transaction = this.db.transaction([this.META_STORE_IDENT]);
-    // const object_store = transaction.objectStore(this.META_STORE_IDENT);
-    // const res:Map<string, BlobMetadata[]> = new Map()
-    // return object_store.openCursor()
-    //   .then((cursor: any) => {
-    //     if (cursor) {
-    //       let key = cursor.primaryKey;
-    //       let value = cursor.value;
-    //       console.log(key, value);
-    //       res.set(key,value)
-    //       cursor.continue();
-    //     }
-    //     return res
-    //   })
-    //   .catch((err: any) => {
-    //     console.warn("error", err)
-    //     return res
-    //   })
+    return this.db.getAll(this.META_STORE_IDENT)
+    // const result: Map<string, BlobMetadata[]> = new Map()
+    // const allKeys = await this.db.getAllKeys(this.META_STORE_IDENT)
+    // for (const k of allKeys) {
+    //   const values = await this.db.get(this.META_STORE_IDENT, k) as BlobMetadata[]
+    //   result.set(k.toString(), values)
+    // }
+    // console.log("result", result)
+    // return result;
   }
 
-  async getBlobFor(sourceId: string, index: number): Promise<Blob> {
-    const mds = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
-    const md = mds[index]
-    return await this.db.get(this.BLOBS_STORE_IDENT, md.blobId) as Blob
+  async getBlobFor(id: string): Promise<Blob> {
+    return await this.db.get(this.BLOBS_STORE_IDENT,id) as Blob
   }
 
-  async addAnnotation(sourceId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
-    const res = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
-    console.log("adding annotation to ", res, index)
-    res[index].annotations ? res[index].annotations.push(annotation) : res[index].annotations = [annotation]
-    await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), sourceId)
-    return res[index].annotations
+  async addAnnotation(snapshotId: string, annotation: Annotation): Promise<Annotation[]> {
+    const res = await this.db.get(this.META_STORE_IDENT, snapshotId) as BlobMetadata
+    console.log(`adding annotation for ${snapshotId} to `, res)
+    res.annotations.push(annotation)
+    await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), snapshotId)
+    return res.annotations
   }
 
   async updateAnnotation(sourceId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
@@ -155,28 +112,18 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return md.annotations
   }
 
-  async deleteMetadataForSource(sourceId: string) {
-    return this.db.delete(this.META_STORE_IDENT, sourceId)
+  async deleteMetadataForSource(snapshotId: string) {
+    const snapshot = await this.db.get(this.META_STORE_IDENT, snapshotId) as BlobMetadata
+    if (snapshot) {
+      await this.db.delete(this.BLOBS_STORE_IDENT, snapshot.blobId)
+    }
+    return this.db.delete(this.META_STORE_IDENT, snapshotId)
   }
 
-  async deleteMetadata(sourceId: string, index: number) {
-    const mds: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, sourceId)
-    mds.splice(index, 1)
-    return this.db.put(this.META_STORE_IDENT, mds, sourceId)
-  }
-
-
-  /**
-   * add blob for id; push to array if already existing
-   */
-  // async saveBlob(id: string, data: Blob): Promise<any> {
-  //   const existing = await this.db.get(this.BLOBS_STORE_IDENT, id)
-  //   if (existing) {
-  //     existing.push(data)
-  //     return this.db.put(this.BLOBS_STORE_IDENT, existing, id)
-  //   } else {
-  //     return this.db.put(this.BLOBS_STORE_IDENT, [data], id)
-  //   }
+  // async deleteMetadata(sourceId: string, index: number) {
+  //   const mds: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, sourceId)
+  //   mds.splice(index, 1)
+  //   return this.db.put(this.META_STORE_IDENT, mds, sourceId)
   // }
 
   /**
@@ -184,33 +131,41 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
    * // TODO transaction
    */
   async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    const existingMetadata: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, id)
-    const blobId = uid()
-    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
-    const metadata = new BlobMetadata(id, blobId, type, url, remark)
-    if (existingMetadata) {
-      existingMetadata.push(metadata)
-      await this.db.put(this.META_STORE_IDENT, existingMetadata, id)
-    } else {
-      await this.db.put(this.META_STORE_IDENT, [metadata], id)
-    }
+    // const blobId = uid()
+    // await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+    // const metadata = new BlobMetadata(id, blobId, BlobType.MHTML, url, remark)
+    // await this.db.put(this.META_STORE_IDENT, metadata, uid())
+    return Promise.reject("not implemented")
   }
 
-  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
-    const existingMetadata: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, id)
+  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<string> {
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
-    const metadata = new BlobMetadata(id, blobId, BlobType.MHTML, url, remark)
-    if (existingMetadata) {
-      existingMetadata.push(metadata)
-      await this.db.put(this.META_STORE_IDENT, existingMetadata, id)
-    } else {
-      await this.db.put(this.META_STORE_IDENT, [metadata], id)
-    }
+
+    const mdId = uid()
+    const metadata = new BlobMetadata(mdId, id, blobId, BlobType.MHTML, url, remark)
+    await this.db.put(this.META_STORE_IDENT, metadata, mdId)
+    return Promise.resolve(mdId)
   }
 
-  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    return Promise.resolve(undefined);
+  async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+    const blobId = uid()
+    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+
+    const mdId = uid()
+    const metadata = new BlobMetadata(mdId, id, blobId, BlobType.PNG, url, remark)
+    await this.db.put(this.META_STORE_IDENT, metadata, mdId)
+    return Promise.resolve(mdId)
+  }
+
+  async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+    const blobId = uid()
+    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+
+    const mdId = uid()
+    const metadata = new BlobMetadata(mdId, id, blobId, BlobType.PDF, url, remark)
+    await this.db.put(this.META_STORE_IDENT, metadata, mdId)
+    return Promise.resolve(mdId)
   }
 
 }

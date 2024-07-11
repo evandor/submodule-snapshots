@@ -17,34 +17,9 @@ export class SaveMHtmlCommand implements Command<string> {
           const captureDetails = {tabId: tabCandidates[0].id || 0}
           console.log("about to capture", captureDetails)
           chrome.pageCapture.saveAsMHTML(captureDetails, async (html: Blob | undefined) => {
-            console.log("blob", html)
+            //console.log("blob", html)
             if (html) { // && this.tab) {
               const mhtmlId = await useSnapshotsStore().saveMHtml(this.id, this.url || '', html)
-              //sendMsg('snapshot-captured', {blobId: mhtmlId, blobType: BlobType.MHTML})
-              //useSnapshotsStore().lastUpdate
-
-              // if (this.tabset && this.tab) {
-              //   let mhtmls: string[] | undefined = this.tab['mhtmls']
-              //   if (!mhtmls) {
-              //     mhtmls = []
-              //   }
-              //   mhtmls.push(mhtmlId)
-              //   this.tab['mhtmls'] = mhtmls
-              //   console.log("this.tab", this.tab)
-              //   useTabsetService().saveTabset(this.tabset)
-              // }
-              //return mhtmlId;
-              // })
-              // .then((res) => {
-              //   //return handleSuccess(new ExecutionResult(res, "Tab was saved"))
-              //   //this.callback(res)
-              //   return new ExecutionResult(res, "done")
-              // })
-              // .catch(err => {
-              //   // return handleError(err)
-              //   console.log("error", err)
-              //   return Promise.reject(err)
-              // })
               return Promise.resolve(mhtmlId)
             }
             return Promise.reject("no html found")
