@@ -85,15 +85,15 @@ export function useSnapshotsService() {
   }
 
   const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
-    await useSnapshotsStore().savePng(id, url, img, remark)
+    return await useSnapshotsStore().savePng(id, url, img, remark)
   }
 
   const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
-    await useSnapshotsStore().savePdf(id, url, img, remark)
+    return await useSnapshotsStore().savePdf(id, url, img, remark)
   }
 
-  const getMetadataFor = (sourceId: string, type: BlobType): Promise<BlobMetadata[]> => {
-    return useSnapshotsStore().metadataFor(sourceId, type)
+  const getMetadataFor = (sourceId: string): Promise<BlobMetadata[]> => {
+    return useSnapshotsStore().metadataFor(sourceId)
   }
 
   const getMetadataById = (id: string): Promise<BlobMetadata> => {
@@ -101,7 +101,7 @@ export function useSnapshotsService() {
     return useSnapshotsStore().metadataById(id)
   }
 
-  const getBlobFor = (id: string): Promise<Blob> => {
+  const getBlobFor = (id: string): Promise<Blob | undefined> => {
     return useSnapshotsStore().blobFor(id)
   }
 
@@ -109,7 +109,7 @@ export function useSnapshotsService() {
     return backendApi.createPng(html)
   }
 
-  const pdfFrom = (html: string) => {
+  const pdfFrom = (html: string) => {1
     return backendApi.createPdf(html)
   }
 

@@ -1,7 +1,6 @@
 import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import _ from "lodash";
-import ContentUtils from "src/core/utils/ContentUtils";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 
 export class SavePngCommand implements Command<string> {

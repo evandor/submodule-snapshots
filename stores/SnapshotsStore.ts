@@ -53,11 +53,11 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return Promise.resolve([])
   }
 
-  const metadataById = (id: string): Promise<BlobMetadata> => {
+  const metadataById = (id: string): Promise<BlobMetadata | undefined> => {
     return storage.getMetadataById(id)
   }
 
-  const blobFor = (id: string): Promise<Blob> => {
+  const blobFor = (id: string): Promise<Blob | undefined> => {
       return storage.getBlobFor(id)
   }
 
@@ -75,8 +75,8 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return await storage.updateAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = async (sourceId: string, toDelete: Annotation, index: number): Promise<Annotation[]> => {
-    return storage.deleteAnnotation(sourceId, index, toDelete)
+  const deleteAnnotation = async (metadataId: string, toDelete: Annotation): Promise<Annotation[]> => {
+    return storage.deleteAnnotation(metadataId, toDelete)
   }
 
   const deleteMetadataForSource = (snapshotId: string) => {

@@ -1,4 +1,4 @@
-import {collection, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
+import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where} from "firebase/firestore";
 import {LocalStorage, uid} from "quasar";
 import {APP_INSTALLATION_ID} from "boot/constants";
 import {useAuthStore} from "stores/authStore";
@@ -7,22 +7,8 @@ import {Annotation} from "src/snapshots/models/Annotation";
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
 import {useTabsetsStore} from "src/tabsets/stores/tabsetsStore";
-import {ref, uploadBytes,getDownloadURL,getBlob} from "firebase/storage";
-import firebase from "firebase/compat";
-import Blob = firebase.firestore.Blob;
-import * as console from "node:console";
-import {index} from "cheerio/lib/api/traversing";
-import * as console from "node:console";
-import {ref} from "vue";
-import * as console from "node:console";
-import * as console from "node:console";
-import * as console from "node:console";
-import Blob = firebase.firestore.Blob;
-import * as console from "node:console";
-import * as console from "node:console";
-import * as url from "node:url";
-import Blob = firebase.firestore.Blob;
-import Blob = firebase.firestore.Blob;
+import {deleteObject, getBlob, ref, uploadBytes} from "firebase/storage";
+import _ from "lodash";
 
 const STORE_IDENT = 'snapshotmetadata';
 const BLOB_IDENT = 'snapshotblobs';
@@ -34,7 +20,7 @@ function blobDoc(id: string) {
 }
 
 function metadataDoc(id: string) {
-  return doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, id)
+  return doc(FirebaseServices.getFirestore(), "users", useAuthStore().user.uid, STORE_IDENT, id)
 }
 
 function metadataCollection() {
@@ -64,102 +50,169 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   clear(name: string): void {
   }
 
-  addAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
-    return Promise.resolve([]);
+  async addAnnotation(mdId: string, annotation: Annotation): Promise<Annotation[]> {
+    const md = await this.getMetadataById(mdId)
+    if (!md) {
+      return Promise.resolve([])
+    }
+    console.log(`adding annotation for ${mdId} to `, md)
+    md.annotations.push(annotation)
+    await setDoc(metadataDoc(mdId), JSON.parse(JSON.stringify(md)))
+    return Promise.resolve(md.annotations)
   }
 
-  deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]> {
-    return Promise.resolve([]);
+  async deleteAnnotation(metadataId: string, toDelete: Annotation): Promise<Annotation[]> {
+    console.log(`trying to delete in ${metadataId}: `, toDelete)
+    const md = await this.getMetadataById(metadataId)
+    if (!md) {
+      console.debug(`not found: metadatId ${metadataId}`)
+      return Promise.resolve([])
+    }
+    md.annotations = _.filter(md.annotations, (a: Annotation) => a.id !== toDelete.id)
+    console.log("deleted annotationm, got", md)
+    await setDoc(metadataDoc(metadataId), JSON.parse(JSON.stringify(md)))
+    return md.annotations
   }
 
-  deleteBlob(blobId: string): void {
+  deleteBlob(blobId: string): Promise<void> {
+    return Promise.reject("deleteBlob not implemented")
   }
 
-  deleteMetadata(sourceId: string, index: number): void {
+  async deleteMetadataForSource(metadataId: string): Promise<void> {
+    const md = await this.getMetadataById(metadataId)
+    if (!md) {
+      return Promise.resolve()
+    }
+    const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${md.blobId}`);
+    deleteObject(storageReference).then(() => {
+    }).catch((error) => {
+      console.log("error", error)
+    });
+    return deleteDoc(doc(FirebaseServices.getFirestore(), "users", useAuthStore().user.uid, STORE_IDENT, metadataId))
   }
 
-  deleteMetadataForSource(sourceId: string): void {
-  }
-
-  async getBlobFor(sourceId: string, index: number): Promise<Blob> {
-    console.log(`getting blob for ${sourceId} and ${index}`)
-    const docs = await getDocs(collection(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, sourceId, 'metadata'))
-    const data = docs.docs[index].data() as BlobMetadata
-    console.log("data", data)
-    const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${data.blobId}`);
-    // const url = await getDownloadURL(storageReference)
-    //
-    // const xhr = new XMLHttpRequest();
-    // xhr.responseType = 'blob';
-    // xhr.onload = (event) => {
-    //   const blob = xhr.response;
-    //   console.log("blob", blob)
-    // };
-    // xhr.open('GET', url);
-    // xhr.send();
-
+  async getBlobFor(id: string): Promise<Blob | undefined> {
+    if (!useAuthStore().user) {
+      console.debug("user not set (yet) in getMetadata")
+      return Promise.resolve(undefined)
+    }
+    console.log(`getting blob for ${id}`)
+    const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${id}`);
     return await getBlob(storageReference)
   }
 
-  async getMetadata(): Promise<Map<string, BlobMetadata[]>> {
-    console.log(" ...loading metadata", this.getServiceName());
-    const mds: Map<string, BlobMetadata[]> = new Map()
+  async getMetadata(): Promise<BlobMetadata[]> {
+    if (!useAuthStore().user) {
+      console.debug("user not set (yet) in getMetadata")
+      return Promise.resolve([])
+    }
+    console.log(" ...loading metadata", this.getServiceName(), useAuthStore().user.uid);
+    const mds: BlobMetadata[] = []
     // useUiStore().syncing = true
     const docs = await getDocs(metadataCollection())
     docs.forEach((doc: any) => {
       let newItem = doc.data() as BlobMetadata
       console.log("newItem", newItem)
-      // newItem.id = doc.id;
-      //useTabsetsStore().setTabset(newItem)
-      // mds.set()
+      mds.push(newItem)
     })
-    console.log("loading tabsets, found ", useTabsetsStore().tabsets.size);
+    console.log("loading metadata, found ", useTabsetsStore().tabsets.size);
     // useUiStore().syncing = false
     return Promise.resolve(mds);
   }
 
-  async getMetadataFor(sourceId: string, type: BlobType): Promise<BlobMetadata[]> {
-    // debugger
-    const mdDocs = await getDocs(collection(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, sourceId, 'metadata'))
-    const docs = mdDocs
-    const res: BlobMetadata[] =[]
-    docs.forEach((doc: any) => {
+  async getMetadataFor(sourceId: string): Promise<BlobMetadata[]> {
+    // return this.db.getAllFromIndex(this.META_STORE_IDENT, 'sourceId', sourceId)
+
+    const res: BlobMetadata[] = []
+
+    const cr = collection(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT)
+    const r = query(cr, where("sourceId", "==", sourceId))
+    const querySnapshot = await getDocs(r);
+    querySnapshot.forEach((doc) => {
+      // doc.data() is never undefined for query doc snapshots
+      console.log(doc.id, " => ", doc.data());
       let newItem = doc.data() as BlobMetadata
-      if (newItem.type === type) {
-        res.push(newItem)
-      }
-    })
+      res.push(newItem)
+    });
+
+    // debugger
+    // const mdDocs = await getDocs(collection(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, sourceId, 'metadata'))
+    // const docs = mdDocs
+    // docs.forEach((doc: any) => {
+    //   let newItem = doc.data() as BlobMetadata
+    //   res.push(newItem)
+    // })
     return res
   }
 
   async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    console.log(`saving metadata ${id}`)
-    const existingMetadata = await getDocs(metadataCollection())
+    // console.log(`saving metadata ${id}`)
+    // const existingMetadata = await getDocs(metadataCollection())
+    //
+    // const blobId = uid()
+    // const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
+    //
+    // //await setDoc(blobDoc(blobId), data)
+    // uploadBytes(storageReference, data).then((snapshot: any) => {
+    //   console.log('Uploaded a blob or file!');
+    // });
+    //
+    // const md = new BlobMetadata(id, blobId, BlobType.HTML, url, remark)
+    // const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, id, 'metadata', uid())
+    // await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
+    return Promise.reject("not implemented")
+  }
+
+  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
+    console.log(`saving MHtml ${id}`)
 
     const blobId = uid()
     const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
-
-    //await setDoc(blobDoc(blobId), data)
     uploadBytes(storageReference, data).then((snapshot: any) => {
       console.log('Uploaded a blob or file!');
     });
 
-    const md = new BlobMetadata(id, blobId, BlobType.HTML, url, remark)
-    const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, id, 'metadata', uid())
+    const mdId = uid()
+    const md = new BlobMetadata(mdId, id, blobId, BlobType.MHTML, url, remark)
+    const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, mdId)
     await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
-  }
-
-  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
-
+    return Promise.resolve(mdId)
   }
 
 
-  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    return Promise.reject("savePng failed");
+  async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+    console.log(`saving Png ${id}`)
+
+    const blobId = uid()
+    const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
+    uploadBytes(storageReference, data).then((snapshot: any) => {
+      console.log('Uploaded a blob or file!');
+    });
+
+    const mdId = uid()
+    const md = new BlobMetadata(mdId, id, blobId, BlobType.PNG, url, remark)
+    const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, mdId)
+    await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
+    return Promise.resolve(mdId)
   }
 
   updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
-    return Promise.resolve([]);
+    return Promise.reject("not implemented")
+  }
+
+  async getMetadataById(id: string): Promise<BlobMetadata | undefined> {
+    if (!useAuthStore().user) {
+      return Promise.resolve(undefined)
+    }
+    const res = await getDoc(metadataDoc(id))
+    if (res) {
+      return Promise.resolve(res.data() as BlobMetadata)
+    }
+    return Promise.reject(`metadata for id '${id}' not found`)
+  }
+
+  savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
+    return Promise.resolve("");
   }
 
 

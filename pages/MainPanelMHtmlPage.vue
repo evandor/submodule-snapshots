@@ -45,7 +45,7 @@ import {useRoute} from "vue-router";
 import Analytics from "src/core/utils/google-analytics";
 import {useUtils} from "src/core/services/Utils";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
-import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
+import {BlobMetadata} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
 import mhtml2html from 'mhtml2html';
@@ -217,14 +217,14 @@ const loadArchivedPage = () => {
 }
 
 watchEffect(async () => {
-  if (snapshotId.value) {
-    if (useSnapshotsStore().lastUpdate) {
-      htmlMetadata.value = await useSnapshotsService().getMetadataById(snapshotId.value)
+  if (snapshotId.value && useSnapshotsStore().lastUpdate) {
+    htmlMetadata.value = await useSnapshotsService().getMetadataById(snapshotId.value)
+    if (htmlMetadata.value) {
       console.log("metadata", htmlMetadata.value)
       currentBlob.value = await useSnapshotsService().getBlobFor(htmlMetadata.value.blobId)
       await setHtml(0)
-      //current.value = index
     }
+    //current.value = index
   }
 })
 
@@ -238,7 +238,7 @@ const setAnnotations = (as: Annotation[]) => {
 }
 
 watchEffect(() => {
-  console.log("===>", current.value, htmlMetadata.value)
+  //console.log("===>", current.value, htmlMetadata.value)
   if (htmlMetadata.value) {
     const as = htmlMetadata.value?.annotations || []
     setAnnotations(as)
@@ -246,7 +246,7 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-  console.log("current", current.value)
+//  console.log("current", current.value)
   setHtml(current.value)
 })
 

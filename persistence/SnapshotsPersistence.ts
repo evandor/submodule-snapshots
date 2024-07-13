@@ -3,50 +3,54 @@ import {Annotation} from "src/snapshots/models/Annotation";
 
 interface SnapshotsPersistence {
 
+  // --- generic ---
   getServiceName(): string
-
   init(): Promise<any>
+  compactDb(): Promise<any>
+  clear(name: string): void
 
-  // --- create new stuff ---
+  // --- creating snapshots---
+
   saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
 
   // ok (indexeddb)
   saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<string>
 
   // ok (indexeddb)
-  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
+  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
   // ok (indexeddb)
-  savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
+  savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
-  // --- metadata ---
+  // --- managing metadata ---
+
   getMetadataFor(sourceId: string): Promise<BlobMetadata[]>
 
-  // ok (indexeddb)
-  getMetadataById(id: string): Promise<BlobMetadata>
+  /**
+   * tries to retrieve the metadata for given metadata id, undefined if not found.
+   */
+  getMetadataById(id: string): Promise<BlobMetadata | undefined>
 
   getMetadata(): Promise<BlobMetadata[]>
 
-  deleteMetadataForSource(snapshotId: string):void
+  deleteMetadataForSource(metadataId: string): Promise<void>
 
-  //deleteMetadata(sourceId: string, index:number):void
+  // --- managing blobs ---
+  getBlobFor(id: string): Promise<Blob | undefined>
 
-  // --- blobs ---
-  getBlobFor(id: string): Promise<Blob>
+  deleteBlob(blobId: string): Promise<void>
 
-  deleteBlob(blobId: string): void;
+  // --- managing annotations ---
 
-  // --- annotations ---
-  addAnnotation(snapshotId: string, annotation: Annotation): Promise<Annotation[]>
+  /**
+   * adds the annotation to the metadata annotations array and returns
+   * the current list of annotations (including the new one)
+   */
+  addAnnotation(metadataId: string, annotation: Annotation): Promise<Annotation[]>
 
   updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]>
 
-  deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]>;
-
-  // --- stuff ---
-  compactDb(): Promise<any>
-
-  clear(name: string): void
+  deleteAnnotation(metadataId: string, toDelete: Annotation): Promise<Annotation[]>;
 
 }
 

@@ -57,7 +57,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return this.db.getAllFromIndex(this.META_STORE_IDENT, 'sourceId', sourceId)
   }
 
-  async getMetadataById(id: string): Promise<BlobMetadata> {
+  async getMetadataById(id: string): Promise<BlobMetadata | undefined> {
     return this.db.get(this.META_STORE_IDENT, id)
   }
 
@@ -102,14 +102,14 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return res[index].annotations
   }
 
-  async deleteAnnotation(sourceId: string, index: number, toDelete: Annotation): Promise<Annotation[]> {
-    const mds = await this.getMetadataFor(sourceId, BlobType.HTML)
-    console.log("mds for ", sourceId, mds)
-    const md = mds[index]
-    console.log("md to delete", md)
-    md.annotations = _.filter(md.annotations, (a: Annotation) => a.id !== toDelete.id)
-    await this.db.put(this.META_STORE_IDENT, mds, sourceId)
-    return md.annotations
+  async deleteAnnotation(metadataId: string, toDelete: Annotation): Promise<Annotation[]> {
+    const md = await this.getMetadataById(metadataId)
+    if (md) {
+      md.annotations = _.filter(md.annotations, (a: Annotation) => a.id !== toDelete.id)
+      await this.db.put(this.META_STORE_IDENT, md, metadataId)
+      return Promise.resolve(md.annotations)
+    }
+    return Promise.resolve([])
   }
 
   async deleteMetadataForSource(snapshotId: string) {
@@ -119,12 +119,6 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     }
     return this.db.delete(this.META_STORE_IDENT, snapshotId)
   }
-
-  // async deleteMetadata(sourceId: string, index: number) {
-  //   const mds: BlobMetadata[] = await this.db.get(this.META_STORE_IDENT, sourceId)
-  //   mds.splice(index, 1)
-  //   return this.db.put(this.META_STORE_IDENT, mds, sourceId)
-  // }
 
   /**
    * add metadata for id; push to array if already existing
@@ -148,7 +142,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.resolve(mdId)
   }
 
-  async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+  async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
 
@@ -158,7 +152,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.resolve(mdId)
   }
 
-  async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+  async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
 
