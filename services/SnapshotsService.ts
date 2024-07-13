@@ -25,7 +25,7 @@ export function useSnapshotsService() {
   }
 
   const warcFrom = (html: string) => {
-    return null//backendApi.createWarc(html)
+    return backendApi.createWarc(html)
   }
 
   // const saveBlob = (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined): Promise<any> => {
@@ -92,6 +92,10 @@ export function useSnapshotsService() {
     return await useSnapshotsStore().savePdf(id, url, img, remark)
   }
 
+  const saveWarc = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
+    return await useSnapshotsStore().saveWarc(id, url, img, remark)
+  }
+
   const getMetadataFor = (sourceId: string): Promise<BlobMetadata[]> => {
     return useSnapshotsStore().metadataFor(sourceId)
   }
@@ -156,6 +160,7 @@ export function useSnapshotsService() {
     updateAnnotation,
     deleteAnnotation,
     deleteSnapshot,
-    warcFrom
+    warcFrom,
+    saveWarc
   }
 }

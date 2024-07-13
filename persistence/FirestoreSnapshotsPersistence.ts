@@ -34,8 +34,6 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async init() {
-    //console.debug(" ...initializing GitPersistenceService")
-    //this.indexedDB = useDB(undefined).db as typeof IndexedDbPersistenceService
     return Promise.resolve("")
   }
 
@@ -51,11 +49,11 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async addAnnotation(mdId: string, annotation: Annotation): Promise<Annotation[]> {
+    console.log(`adding annotation for '${mdId}'`)
     const md = await this.getMetadataById(mdId)
     if (!md) {
       return Promise.resolve([])
     }
-    console.log(`adding annotation for ${mdId} to `, md)
     md.annotations.push(annotation)
     await setDoc(metadataDoc(mdId), JSON.parse(JSON.stringify(md)))
     return Promise.resolve(md.annotations)
@@ -121,10 +119,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async getMetadataFor(sourceId: string): Promise<BlobMetadata[]> {
-    // return this.db.getAllFromIndex(this.META_STORE_IDENT, 'sourceId', sourceId)
-
     const res: BlobMetadata[] = []
-
     const cr = collection(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT)
     const r = query(cr, where("sourceId", "==", sourceId))
     const querySnapshot = await getDocs(r);
@@ -134,14 +129,6 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
       let newItem = doc.data() as BlobMetadata
       res.push(newItem)
     });
-
-    // debugger
-    // const mdDocs = await getDocs(collection(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, sourceId, 'metadata'))
-    // const docs = mdDocs
-    // docs.forEach((doc: any) => {
-    //   let newItem = doc.data() as BlobMetadata
-    //   res.push(newItem)
-    // })
     return res
   }
 
@@ -165,35 +152,40 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
 
   async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
     console.log(`saving MHtml ${id}`)
-
-    const blobId = uid()
-    const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
-    uploadBytes(storageReference, data).then((snapshot: any) => {
-      console.log('Uploaded a blob or file!');
-    });
-
-    const mdId = uid()
-    const md = new BlobMetadata(mdId, id, blobId, BlobType.MHTML, url, remark)
-    const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, mdId)
-    await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
+    const blobId = this.saveBlob(data);
+    const mdId = await this.saveMetadata(id, blobId, BlobType.MHTML, url, remark);
     return Promise.resolve(mdId)
   }
 
-
   async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
     console.log(`saving Png ${id}`)
+    const blobId = this.saveBlob(data);
+    const mdId = await this.saveMetadata(id, blobId, BlobType.PNG, url, remark);
+    return Promise.resolve(mdId)
+  }
 
+  async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
+    console.log(`saving PDF ${id}`)
+    const blobId = this.saveBlob(data);
+    const mdId = await this.saveMetadata(id, blobId, BlobType.PDF, url, remark);
+    return Promise.resolve(mdId)
+  }
+
+  private async saveMetadata(id: string, blobId: string, blobType: BlobType, url: string, remark: string | undefined) {
+    const mdId = uid()
+    const md = new BlobMetadata(mdId, id, blobId, blobType, url, remark)
+    const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, mdId)
+    await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
+    return mdId;
+  }
+
+  private saveBlob(data: Blob) {
     const blobId = uid()
     const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
     uploadBytes(storageReference, data).then((snapshot: any) => {
       console.log('Uploaded a blob or file!');
     });
-
-    const mdId = uid()
-    const md = new BlobMetadata(mdId, id, blobId, BlobType.PNG, url, remark)
-    const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, mdId)
-    await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
-    return Promise.resolve(mdId)
+    return blobId;
   }
 
   updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
@@ -211,9 +203,6 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.reject(`metadata for id '${id}' not found`)
   }
 
-  savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
-    return Promise.resolve("");
-  }
 
 
 }

@@ -4,7 +4,8 @@ export enum BlobType {
   PNG = "PNG",
   PDF = "PDF",
   MHTML = "MHTML",
-  HTML = "HTML"
+  HTML = "HTML",
+  WARC = "WARC"
 }
 
 export class BlobMetadata {

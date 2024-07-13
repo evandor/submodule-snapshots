@@ -46,6 +46,12 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return res
   }
 
+  const saveWarc = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
+    const res = storage.saveBlob(id, url, img, BlobType.WARC, remark)
+    lastUpdate.value = new Date().getTime()
+    return res
+  }
+
   const metadataFor = (sourceId: string): Promise<BlobMetadata[]> => {
     if (storage) {
       return storage.getMetadataFor(sourceId)
@@ -99,6 +105,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     createAnnotation,
     updateAnnotation,
     deleteAnnotation,
-    deleteMetadataForSource
+    deleteMetadataForSource,
+    saveWarc
   }
 })
