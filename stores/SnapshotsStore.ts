@@ -85,8 +85,8 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return storage.deleteAnnotation(metadataId, toDelete)
   }
 
-  const deleteMetadataForSource = (snapshotId: string) => {
-    storage.deleteMetadataForSource(snapshotId)
+  const deleteMetadataForSource = async (snapshotId: string) => {
+    await storage.deleteMetadataForSource(snapshotId)
     lastUpdate.value = new Date().getTime()
   }
 

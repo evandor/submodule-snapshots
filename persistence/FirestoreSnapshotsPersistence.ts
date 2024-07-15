@@ -133,21 +133,10 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    // console.log(`saving metadata ${id}`)
-    // const existingMetadata = await getDocs(metadataCollection())
-    //
-    // const blobId = uid()
-    // const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
-    //
-    // //await setDoc(blobDoc(blobId), data)
-    // uploadBytes(storageReference, data).then((snapshot: any) => {
-    //   console.log('Uploaded a blob or file!');
-    // });
-    //
-    // const md = new BlobMetadata(id, blobId, BlobType.HTML, url, remark)
-    // const mdDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', STORE_IDENT, id, 'metadata', uid())
-    // await setDoc(mdDoc, JSON.parse(JSON.stringify(md)))
-    return Promise.reject("not implemented")
+    console.log(`saving Html ${id}`)
+    const blobId = this.saveBlob(data);
+    const mdId = await this.saveMetadata(id, blobId, BlobType.HTML, url, remark);
+    return Promise.resolve(mdId)
   }
 
   async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {

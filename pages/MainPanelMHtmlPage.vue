@@ -18,16 +18,16 @@
           />
         </div>
 
-        <div class="col q-my-md" v-if="!proceedToPage">
+        <div class="col q-my-md" v-if="!initialProceedToPage">
           Archived Snapshots may not look exactly like their originals, but they will not change in future.
         </div>
-        <div class="col" v-if="!proceedToPage">
+        <div class="col" v-if="!initialProceedToPage">
           <q-checkbox label="skip future acknowledgments" v-model="proceedToPage"></q-checkbox>
         </div>
-        <div class="col q-my-md" v-if="!proceedToPage">
+        <div class="col q-my-md" v-if="!initialProceedToPage">
           <span class="cursor-pointer text-blue-10 text-bold" @click="loadArchivedPage()">Got it!</span>
         </div>
-        <div class="col q-my-md" v-if="proceedToPage && htmlMetadata?.url">
+        <div class="col q-my-md" v-if="initialProceedToPage && htmlMetadata?.url">
           redirecting...
         </div>
       </div>
@@ -73,8 +73,13 @@ const proceedToPage = ref(false)
 
 const localStorage = useQuasar().localStorage
 
+const initialProceedToPage = localStorage.getItem('ui.proceedToArchivedPage')
+console.log("initialProceedtopage", initialProceedToPage)
+
 onMounted(() => {
-  Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href);
+  Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href)
+
+
 
   proceedToPage.value = localStorage.getItem('ui.proceedToArchivedPage') || false
 
@@ -143,36 +148,61 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true
 })
 
-const setHtml = async (index: number) => {
+const setHtml = async () => {
   //html.value = currentBlob.value //htmls.value[index] as unknown as SavedBlob | undefined
   if (currentBlob.value) {
-    const urlCreator = window.URL || window.webkitURL;
-    window.URL.createObjectURL(new Blob([]));
-    const c = await currentBlob.value.text()
-    const converted = mhtml2html.convert(c)
+    console.log("route.path", route.path)
+    if (route.path.toLowerCase().startsWith("/mainpanel/mhtml")) {
+      window.URL.createObjectURL(new Blob([]));
+      const c = await currentBlob.value.text()
+      const converted = mhtml2html.convert(c)
+
+      const css = converted.window.document.createElement('style');
+      // // my_awesome_script.setAttribute('src','http://example.com/site.js');
+      // my_awesome_script.text = "document.onpointerup = (e: any) => {alert(document.selection)}"
+      css.type = 'text/css';
+      css.appendChild(converted.window.document.createTextNode("::selection {color: red;background-color: yellow;}"));
+      // css.appendChild(converted.window.document.createTextNode("[contenteditable=\"true\"]:focus {background-color: orange;}"));
+      converted.window.document.head.appendChild(css);
+
+      const overlayDiv = converted.window.document.createElement('div')
+      //overlayDiv.style.text = "position: absolute; left: 50%; top:20%"
+      overlayDiv.innerText = "Bibbly Snapshot   "
+      overlayDiv.style.cssText = 'margin:3px 3px; padding:5px 5px; position:absolute;top:5px;right:5px;width:150px;border:2px solid red;border-radius:3px;z-index:2147483647;background-color:white';
+
+      const overlayImg = converted.window.document.createElement('img')
+      overlayImg.src = "icons/favicon-32x32.png"
+      overlayImg.height = "18"
+
+      const overlayBtn = converted.window.document.createElement('button')
+      overlayBtn.id = "snapshots_edit_btn"
+      overlayBtn.type = "button"
+      overlayBtn.innerText = "Edit"
+
+      overlayDiv.appendChild(overlayImg)
+
+      //overlayDiv.appendChild(overlayBtn)
+
+      converted.window.document.body.appendChild(overlayDiv)
+
+      const htmlBlob = converted.window.document.documentElement.innerHTML
+
+      const $ = cheerio.load(htmlBlob);
+      // $("h1,h2,h3,h4,h5,h6,div,p").each(function () {
+      //    // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
+      //   // $(this).attr("contenteditable", "true");
+      // });
 
 
-    const css = converted.window.document.createElement('style');
-    // // my_awesome_script.setAttribute('src','http://example.com/site.js');
-    // my_awesome_script.text = "document.onpointerup = (e: any) => {alert(document.selection)}"
-    css.type = 'text/css';
-    css.appendChild(converted.window.document.createTextNode("::selection {color: red;background-color: yellow;}"));
-    // css.appendChild(converted.window.document.createTextNode("[contenteditable=\"true\"]:focus {background-color: orange;}"));
-    converted.window.document.head.appendChild(css);
+      htmlSnapshot.value = $.html()
 
-    const overlayDiv = converted.window.document.createElement('div')
-    //overlayDiv.style.text = "position: absolute; left: 50%; top:20%"
-    overlayDiv.innerText = "Bibbly Snapshot   "
-    overlayDiv.style.cssText = 'margin:3px 3px; padding:5px 5px; position:absolute;top:5px;right:5px;width:150px;border:2px solid red;border-radius:3px;z-index:2147483647;background-color:white';
+    } else {
+      htmlSnapshot.value = await currentBlob.value.text()
+      console.log("====>", htmlSnapshot.value)
+    }
 
-    const overlayImg = converted.window.document.createElement('img')
-    overlayImg.src = "icons/favicon-32x32.png"
-    overlayImg.height = "18"
 
-    const overlayBtn = converted.window.document.createElement('button')
-    overlayBtn.id = "snapshots_edit_btn"
-    overlayBtn.type = "button"
-    overlayBtn.innerText = "Edit"
+
 
     // const overlayScript = converted.window.document.createElement('script')
     // overlayScript.onload = function() {
@@ -183,25 +213,12 @@ const setHtml = async (index: number) => {
     // converted.window.document.body.appendChild(overlayScript)
 
 
-    overlayDiv.appendChild(overlayImg)
-
-    //overlayDiv.appendChild(overlayBtn)
-
-    converted.window.document.body.appendChild(overlayDiv)
-
-    const htmlBlob = converted.window.document.documentElement.innerHTML
-
-    const $ = cheerio.load(htmlBlob);
-    // $("h1,h2,h3,h4,h5,h6,div,p").each(function () {
-    //    // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
-    //   // $(this).attr("contenteditable", "true");
-    // });
 
 
-    htmlSnapshot.value = $.html()
+
     //console.log("resulting htmlSnapshot", htmlSnapshot.value)
 
-    if (proceedToPage.value) {
+    if (localStorage.getItem('ui.proceedToArchivedPage')) {
       setTimeout(() => {
         loadArchivedPage()
       }, 500)
@@ -222,7 +239,7 @@ watchEffect(async () => {
     if (htmlMetadata.value) {
       console.log("metadata", htmlMetadata.value)
       currentBlob.value = await useSnapshotsService().getBlobFor(htmlMetadata.value.blobId)
-      await setHtml(0)
+      await setHtml()
     }
     //current.value = index
   }
@@ -247,7 +264,7 @@ watchEffect(() => {
 
 watchEffect(() => {
 //  console.log("current", current.value)
-  setHtml(current.value)
+  setHtml()
 })
 
 window.onscroll = function () {

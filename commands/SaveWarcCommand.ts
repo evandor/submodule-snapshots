@@ -18,26 +18,35 @@ export class SaveWarcCommand implements Command<string> {
     if (tabcandidates.length > 0) {
       console.log("about to capture Web Archive")
 
-      const chrometab = tabcandidates[0]
+      const chromeTab = tabcandidates[0]
 
-      const res = await chrome.tabs.sendMessage(
-        chrometab.id || 0,
-        "getcontent",
-        {})
+      chrome.tabs.sendMessage(
+        chromeTab.id || 0,
+        "getContent",
+        {},
+        async (res) => {
+          console.log("getContent returned result with length", res?.content?.length, chromeTab.id)
+          // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
+          let html = res.content
+          return useSnapshotsService().warcFrom(html)
+            .then((res: any) => {
+              console.log("res", res, typeof res)
+              console.log("res2", typeof res.data)
 
-      console.log("getcontent returned result with length", res?.content?.length, chrometab.id)
-      // let html = await contentutils.setbasehref(tabcandidates[0].url || '', res.content)
-      let html = res.content
-      try {
-        const res2 = await useSnapshotsService().warcFrom(html)
-        await useSnapshotsService().saveWarc(this.id, chrometab.url || '', res2.data)
-        return new ExecutionResult<string>(
-          "done",
-          "warc created")
-      } catch (err: any) {
-        console.warn("got error: ", err)
-      }
-      //})
+              useSnapshotsService().saveWarc(this.id, chromeTab.url || '', res.data)
+              // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
+
+              return new ExecutionResult(
+                "done",
+                "Warc created")
+            }).catch((err: any) => {
+              console.warn("got error: ", err)
+              //return handleError(err)
+            })
+
+
+        })
+
 
 
       return new ExecutionResult("trying to save", "trying to save")

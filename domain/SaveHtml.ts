@@ -3,7 +3,6 @@ import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import {useNotificationHandler} from "src/core/services/ErrorHandler";
 import ContentUtils from "src/core/utils/ContentUtils";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService"
-import { WARCRecord, WARCSerializer } from "warcio";
 
 const {handleSuccess, handleError} = useNotificationHandler()
 
@@ -21,10 +20,6 @@ export class SaveHtmlCommand implements Command<any> {
   }
 
   async execute(): Promise<ExecutionResult<any>> {
-    // if (!usePermissionsStore().hasPermission('pageCapture')) {
-    //     handleError("missing permission pageCapture")
-    //     return Promise.reject("xxx")
-    // }
     console.log("capturing tab", this.chromeTab.id, this.chromeTab.url)
 
     chrome.tabs.query({currentWindow: true}).then((r: any) => {
