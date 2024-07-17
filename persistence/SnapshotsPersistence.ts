@@ -11,18 +11,18 @@ interface SnapshotsPersistence {
 
   // --- creating snapshots---
 
-  saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
+  // saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any>
+  //
+  // // ok (indexeddb)
+  // saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<string>
+  //
+  // // ok (indexeddb)
+  // savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
+  //
+  // // ok (indexeddb)
+  // savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
-  // ok (indexeddb)
-  saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<string>
-
-  // ok (indexeddb)
-  savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
-
-  // ok (indexeddb)
-  savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
-
-  //saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
+  saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
   // --- managing metadata ---
 

@@ -17,8 +17,8 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async init() {
-    console.debug(` ...initializing ${this.getServiceName()}`)
     this.db = await this.initDatabase()
+    console.debug(` ...initialized snapshots: ${this.getServiceName()}`,'✅')
     return Promise.resolve()
   }
 
@@ -132,35 +132,35 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.reject("not implemented")
   }
 
-  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<string> {
+  async saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
 
     const mdId = uid()
-    const metadata = new BlobMetadata(mdId, id, blobId, BlobType.MHTML, url, remark)
+    const metadata = new BlobMetadata(mdId, id, blobId, type, url, remark)
     await this.db.put(this.META_STORE_IDENT, metadata, mdId)
     return Promise.resolve(mdId)
   }
 
-  async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
-    const blobId = uid()
-    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
-
-    const mdId = uid()
-    const metadata = new BlobMetadata(mdId, id, blobId, BlobType.PNG, url, remark)
-    await this.db.put(this.META_STORE_IDENT, metadata, mdId)
-    return Promise.resolve(mdId)
-  }
-
-  async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
-    const blobId = uid()
-    await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
-
-    const mdId = uid()
-    const metadata = new BlobMetadata(mdId, id, blobId, BlobType.PDF, url, remark)
-    await this.db.put(this.META_STORE_IDENT, metadata, mdId)
-    return Promise.resolve(mdId)
-  }
+  // async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
+  //   const blobId = uid()
+  //   await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+  //
+  //   const mdId = uid()
+  //   const metadata = new BlobMetadata(mdId, id, blobId, BlobType.PNG, url, remark)
+  //   await this.db.put(this.META_STORE_IDENT, metadata, mdId)
+  //   return Promise.resolve(mdId)
+  // }
+  //
+  // async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
+  //   const blobId = uid()
+  //   await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
+  //
+  //   const mdId = uid()
+  //   const metadata = new BlobMetadata(mdId, id, blobId, BlobType.PDF, url, remark)
+  //   await this.db.put(this.META_STORE_IDENT, metadata, mdId)
+  //   return Promise.resolve(mdId)
+  // }
 
 }
 

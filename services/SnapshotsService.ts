@@ -4,21 +4,11 @@ import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {uid} from "quasar";
 
-//let db: SnapshotsPersistence = null as unknown as SnapshotsPersistence
-
 export function useSnapshotsService() {
 
   const init = async () => {
-    console.debug(" ...initializing snapshotsService")
-    //db = storage
-    //await db.init()
-    // initListeners()
+    console.debug(" ...initialized snapshots: Service", '✅')
   }
-
-  // const getBlobForTab = async (tabId: string, type: BlobType) => {
-  //   const blobs = await db.getBlobsForTab(tabId)
-  //   return null//_.filter(blobs, (b: SavedBlob) => b.type === type)
-  // }
 
   const convertFrom = (html: string) => {
     return backendApi.createPdf(html)
@@ -27,15 +17,6 @@ export function useSnapshotsService() {
   const warcFrom = (html: string) => {
     return backendApi.createWarc(html)
   }
-
-  // const saveBlob = (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined): Promise<any> => {
-  //   return db.saveBlob(id, url, data, type, remark)
-  // }
-
-  // const saveBlob = async (id: string, url: string, data: Blob, type: BlobType, remark: string | undefined = undefined) => {
-  //   await useSnapshotsStore().saveBlob(id,data)
-  //   await useSnapshotsStore().saveMetadata(id,url,type,remark)
-  // }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
 
@@ -100,7 +81,7 @@ export function useSnapshotsService() {
     return useSnapshotsStore().metadataFor(sourceId)
   }
 
-  const getMetadataById = (id: string): Promise<BlobMetadata> => {
+  const getMetadataById = (id: string): Promise<BlobMetadata | undefined> => {
     console.log("getMetadataById", id)
     return useSnapshotsStore().metadataById(id)
   }
@@ -135,8 +116,8 @@ export function useSnapshotsService() {
     return useSnapshotsStore().updateAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = (sourceId: string, a: Annotation, i: number): Promise<Annotation[]> => {
-    return useSnapshotsStore().deleteAnnotation(sourceId, a, i)
+  const deleteAnnotation = (metadataId: string, a: Annotation, i: number): Promise<Annotation[]> => {
+    return useSnapshotsStore().deleteAnnotation(metadataId, a)
   }
 
   const deleteSnapshot = (snapshotId: string) => {

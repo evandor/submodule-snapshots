@@ -13,15 +13,15 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
   const lastUpdate = ref(0)
 
   async function initialize(ps: SnapshotsPersistence) {
-    console.debug(" ...initializing snapshotsStore")
     storage = ps
     await storage.init()
     metadata.value = await storage.getMetadata()
     lastUpdate.value = new Date().getTime()
+    console.debug(" ...initialized snapshots: Store",'✅')
   }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined): Promise<any> => {
-    const res = await storage.saveHTML(id, url, new Blob([html], {
+    const res = await storage.saveBlob(id, url, new Blob([html], {
       type: 'text/html'
     }), BlobType.HTML, remark)
     lastUpdate.value = new Date().getTime()
@@ -29,19 +29,19 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
   }
 
   const saveMHtml = async (id: string, url: string, mhtml: Blob, remark: string | undefined = undefined): Promise<string> => {
-    const res = await storage.saveMHtml(id, url, mhtml, remark)
+    const res = await storage.saveBlob(id, url, mhtml, BlobType.MHTML, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
   const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
-    const res = storage.savePng(id, url, img, BlobType.PNG, remark)
+    const res = storage.saveBlob(id, url, img, BlobType.PNG, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
   const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
-    const res = storage.savePdf(id, url, img, BlobType.PDF, remark)
+    const res = storage.saveBlob(id, url, img, BlobType.PDF, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }

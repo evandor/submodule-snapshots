@@ -34,6 +34,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async init() {
+    console.debug(` ...initialized snapshots: ${this.getServiceName()}`,'✅')
     return Promise.resolve("")
   }
 
@@ -110,10 +111,10 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     const docs = await getDocs(metadataCollection())
     docs.forEach((doc: any) => {
       let newItem = doc.data() as BlobMetadata
-      console.log("newItem", newItem)
+      //console.log("newItem", newItem)
       mds.push(newItem)
     })
-    console.log("loading metadata, found ", useTabsetsStore().tabsets.size);
+    console.log("loading metadata, found ", mds.length);
     // useUiStore().syncing = false
     return Promise.resolve(mds);
   }
@@ -125,40 +126,40 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     const querySnapshot = await getDocs(r);
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      console.log(doc.id, " => ", doc.data());
+      //console.log(doc.id, " => ", doc.data());
       let newItem = doc.data() as BlobMetadata
       res.push(newItem)
     });
     return res
   }
 
-  async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    console.log(`saving Html ${id}`)
-    const blobId = this.saveBlob(data);
-    const mdId = await this.saveMetadata(id, blobId, BlobType.HTML, url, remark);
+  async saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+    console.log(`saving Blob ${id}, type ${type}`)
+    const blobId = this.saveBlobToStorage(data);
+    const mdId = await this.saveMetadata(id, blobId,type, url, remark);
     return Promise.resolve(mdId)
   }
 
-  async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
-    console.log(`saving MHtml ${id}`)
-    const blobId = this.saveBlob(data);
-    const mdId = await this.saveMetadata(id, blobId, BlobType.MHTML, url, remark);
-    return Promise.resolve(mdId)
-  }
-
-  async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-    console.log(`saving Png ${id}`)
-    const blobId = this.saveBlob(data);
-    const mdId = await this.saveMetadata(id, blobId, BlobType.PNG, url, remark);
-    return Promise.resolve(mdId)
-  }
-
-  async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
-    console.log(`saving PDF ${id}`)
-    const blobId = this.saveBlob(data);
-    const mdId = await this.saveMetadata(id, blobId, BlobType.PDF, url, remark);
-    return Promise.resolve(mdId)
-  }
+  // async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
+  //   console.log(`saving MHtml ${id}`)
+  //   const blobId = this.saveBlobToStorage(data);
+  //   const mdId = await this.saveMetadata(id, blobId, BlobType.MHTML, url, remark);
+  //   return Promise.resolve(mdId)
+  // }
+  //
+  // async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+  //   console.log(`saving Png ${id}`)
+  //   const blobId = this.saveBlobToStorage(data);
+  //   const mdId = await this.saveMetadata(id, blobId, BlobType.PNG, url, remark);
+  //   return Promise.resolve(mdId)
+  // }
+  //
+  // async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
+  //   console.log(`saving PDF ${id}`)
+  //   const blobId = this.saveBlobToStorage(data);
+  //   const mdId = await this.saveMetadata(id, blobId, BlobType.PDF, url, remark);
+  //   return Promise.resolve(mdId)
+  // }
 
   private async saveMetadata(id: string, blobId: string, blobType: BlobType, url: string, remark: string | undefined) {
     const mdId = uid()
@@ -168,7 +169,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     return mdId;
   }
 
-  private saveBlob(data: Blob) {
+  private saveBlobToStorage(data: Blob) {
     const blobId = uid()
     const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
     uploadBytes(storageReference, data).then((snapshot: any) => {
