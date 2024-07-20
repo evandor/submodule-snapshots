@@ -105,7 +105,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
       console.debug("user not set (yet) in getMetadata")
       return Promise.resolve([])
     }
-    console.log(" ...loading metadata", this.getServiceName(), useAuthStore().user.uid);
+    console.debug(" ...loading metadata", this.getServiceName(), useAuthStore().user.uid);
     const mds: BlobMetadata[] = []
     // useUiStore().syncing = true
     const docs = await getDocs(metadataCollection())
@@ -126,7 +126,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     const querySnapshot = await getDocs(r);
     querySnapshot.forEach((doc) => {
       // doc.data() is never undefined for query doc snapshots
-      //console.log(doc.id, " => ", doc.data());
+      //109console.log(doc.id, " => ", doc.data());
       let newItem = doc.data() as BlobMetadata
       res.push(newItem)
     });
