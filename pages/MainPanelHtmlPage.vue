@@ -48,9 +48,9 @@ import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import {BlobMetadata} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
-import mhtml2html from 'mhtml2html';
 import {useQuasar} from "quasar";
 import * as cheerio from "cheerio";
+import _ from "lodash"
 
 const route = useRoute()
 const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils()
@@ -78,7 +78,6 @@ console.log("initialProceedtopage", initialProceedToPage)
 
 onMounted(() => {
   Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href)
-
 
 
   proceedToPage.value = localStorage.getItem('ui.proceedToArchivedPage') || false
@@ -148,6 +147,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true
 })
 
+function cssLeaves(selectors: string[]): string {
+  return _.join(_.map(selectors, (s: string) => s + ":not(:has(*))"), ",")
+}
+
 const setHtml = async () => {
   //html.value = currentBlob.value //htmls.value[index] as unknown as SavedBlob | undefined
   if (currentBlob.value) {
@@ -183,7 +186,7 @@ const setHtml = async () => {
 
       // //overlayDiv.appendChild(overlayBtn)
 
-        //converted.window.document.body.appendChild(overlayDiv)
+      //converted.window.document.body.appendChild(overlayDiv)
 
 
       // const overlayScript = converted.window.document.createElement('script')
@@ -206,8 +209,10 @@ const setHtml = async () => {
       const htmlBlob = c
 
       const $ = cheerio.load(htmlBlob);
-      $("h1,h2,h3,h4,h5,h6,div,p").each(function () {
-       // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
+      const editableSelector = `${cssLeaves(["h1","h2","h3","h4","h5","h6", "p","span"])}`
+      console.log("editableselector", editableSelector)
+      $(editableSelector).each(function () {
+        // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
         $(this).attr("contenteditable", "true");
         // $(this).attr("onblur", "alert('hier')")
       });
@@ -219,8 +224,6 @@ const setHtml = async () => {
       htmlSnapshot.value = await currentBlob.value.text()
       console.log("====>", htmlSnapshot.value)
     }
-
-
 
 
     //console.log("resulting htmlSnapshot", htmlSnapshot.value)
