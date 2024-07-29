@@ -185,13 +185,34 @@ const setHtml = async () => {
 
       converted.window.document.body.appendChild(overlayDiv)
 
+
+      // const overlayScript = converted.window.document.createElement('script')
+      // overlayScript.onload = function() {
+      //   alert("Script loaded and ready");
+      // };
+      // //overlayScript.src = "chrome-extension://pndffocijjfpmphlhkoijmpfckjafdpl/www/js/my-content-script.js";
+      //
+      // overlayScript.type = 'text/javascript';
+      // var code = 'console.log("script insert");';
+      // try { // doesn't work on ie...
+      //   overlayScript.appendChild(document.createTextNode(code));
+      // } catch(e) { // IE has funky script nodes
+      //   overlayScript.text = code;
+      // }
+
+      // overlayScript.execute
+      //converted.window.document.body.appendChild(overlayScript)
+
+
+
       const htmlBlob = converted.window.document.documentElement.innerHTML
 
       const $ = cheerio.load(htmlBlob);
-      // $("h1,h2,h3,h4,h5,h6,div,p").each(function () {
-      //    // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
-      //   // $(this).attr("contenteditable", "true");
-      // });
+      $("h1,h2,h3,h4,h5,h6,div,p").each(function () {
+        //$(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
+        $(this).attr("contenteditable", "true");
+        // $(this).attr("onblur", "alert('hier')")
+      });
 
 
       htmlSnapshot.value = $.html()
@@ -200,18 +221,6 @@ const setHtml = async () => {
       htmlSnapshot.value = await currentBlob.value.text()
       console.log("====>", htmlSnapshot.value)
     }
-
-
-
-
-    // const overlayScript = converted.window.document.createElement('script')
-    // overlayScript.onload = function() {
-    //   alert("Script loaded and ready");
-    // };
-    // overlayScript.src = "chrome-extension://pndffocijjfpmphlhkoijmpfckjafdpl/www/js/my-content-script.js";
-    // overlayScript.execute
-    // converted.window.document.body.appendChild(overlayScript)
-
 
 
 

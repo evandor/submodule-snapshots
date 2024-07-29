@@ -23,9 +23,9 @@ export class SavePngCommand implements Command<string> {
             "getContent",
             {},
             async (res) => {
-              console.log("getContent returned result with length", res?.content?.length, chromeTab.id)
+              console.log("getContent returned result with length", res?.html?.length, chromeTab.id)
               // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
-              let html = res.content
+              let html = res.html
               return useSnapshotsService().screenshotFrom(html)
                 .then((res: any) => {
                   console.log("res", res, typeof res)

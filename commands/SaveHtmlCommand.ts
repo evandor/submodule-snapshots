@@ -15,7 +15,7 @@ export class SaveHtmlCommand implements Command<string> {
       .then((tabs: chrome.tabs.Tab[]) => {
         const tabCandidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === this.url)
         if (tabCandidates.length > 0) {
-          console.log("about to capture png")
+          console.log("about to capture html")
 
           const chromeTab = tabCandidates[0]
 
@@ -24,8 +24,11 @@ export class SaveHtmlCommand implements Command<string> {
             "getContent",
             {},
             async (res) => {
-              console.log("getContent returned result with length", res?.content?.length, chromeTab.id)
-              let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.content)
+              console.log("getContent returned result with length", res?.html, chromeTab.id)
+              let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.html)
+              console.log("----")
+              console.log(html)
+              console.log("----")
               await useSnapshotsService().saveHTML(this.id, chromeTab.url || '', html)
               return new ExecutionResult(
                 "done",
