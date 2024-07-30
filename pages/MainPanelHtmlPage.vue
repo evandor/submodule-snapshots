@@ -56,6 +56,7 @@ const route = useRoute()
 const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils()
 
 const snapshotId = ref<string>()
+const editable = ref<boolean>(route.query.edit as string === "true")
 const htmlMetadata = ref<BlobMetadata | undefined>(undefined)
 const html = ref<BlobMetadata | undefined>(undefined)
 const currentBlob = ref<Blob | undefined>(undefined)
@@ -158,65 +159,16 @@ const setHtml = async () => {
     if (route.path.toLowerCase().startsWith("/mainpanel/html")) {
       window.URL.createObjectURL(new Blob([]));
       const c = await currentBlob.value.text()
-      //const converted = mhtml2html.convert(c)
-
-      // const css = converted.window.document.createElement('style');
-      // // // my_awesome_script.setAttribute('src','http://example.com/site.js');
-      // // my_awesome_script.text = "document.onpointerup = (e: any) => {alert(document.selection)}"
-      // css.type = 'text/css';
-      // css.appendChild(converted.window.document.createTextNode("::selection {color: red;background-color: yellow;}"));
-      // // css.appendChild(converted.window.document.createTextNode("[contenteditable=\"true\"]:focus {background-color: orange;}"));
-      // converted.window.document.head.appendChild(css);
-      //
-      // const overlayDiv = converted.window.document.createElement('div')
-      // //overlayDiv.style.text = "position: absolute; left: 50%; top:20%"
-      // overlayDiv.innerText = "Bibbly Snapshot   "
-      // overlayDiv.style.cssText = 'margin:3px 3px; padding:5px 5px; position:absolute;top:5px;right:5px;width:150px;border:2px solid red;border-radius:3px;z-index:2147483647;background-color:white';
-      //
-      // const overlayImg = converted.window.document.createElement('img')
-      // overlayImg.src = "icons/favicon-32x32.png"
-      // overlayImg.height = "18"
-      //
-      // const overlayBtn = converted.window.document.createElement('button')
-      // overlayBtn.id = "snapshots_edit_btn"
-      // overlayBtn.type = "button"
-      // overlayBtn.innerText = "Edit"
-      //
-      // overlayDiv.appendChild(overlayImg)
-
-      // //overlayDiv.appendChild(overlayBtn)
-
-      //converted.window.document.body.appendChild(overlayDiv)
-
-
-      // const overlayScript = converted.window.document.createElement('script')
-      // overlayScript.onload = function() {
-      //   alert("Script loaded and ready");
-      // };
-      // //overlayScript.src = "chrome-extension://pndffocijjfpmphlhkoijmpfckjafdpl/www/js/my-content-script.js";
-      //
-      // overlayScript.type = 'text/javascript';
-      // var code = 'console.log("script insert");';
-      // try { // doesn't work on ie...
-      //   overlayScript.appendChild(document.createTextNode(code));
-      // } catch(e) { // IE has funky script nodes
-      //   overlayScript.text = code;
-      // }
-
-      // overlayScript.execute
-      //converted.window.document.body.appendChild(overlayScript)
-
       const htmlBlob = c
-
       const $ = cheerio.load(htmlBlob);
-      const editableSelector = `${cssLeaves(["h1","h2","h3","h4","h5","h6", "p","span"])}`
-      console.log("editableselector", editableSelector)
-      $(editableSelector).each(function () {
-        // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
-        $(this).attr("contenteditable", "true");
-        // $(this).attr("onblur", "alert('hier')")
-      });
-
+      if (editable.value) {
+        const editableSelector = `${cssLeaves(["h1", "h2", "h3", "h4", "h5", "h6", "p", "span"])}`
+        $(editableSelector).each(function () {
+          // $(this).after('<span contenteditable="true" style="background-color:yellow">+</span>');
+          $(this).attr("contenteditable", "true");
+          // $(this).attr("onblur", "alert('hier')")
+        });
+      }
 
       htmlSnapshot.value = $.html()
 
