@@ -5,6 +5,7 @@ export enum BlobType {
   PDF = "PDF",
   MHTML = "MHTML",
   HTML = "HTML",
+  EditedHTML = "EditedHTML",
   WARC = "WARC"
 }
 

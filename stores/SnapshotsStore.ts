@@ -28,6 +28,14 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return res
   }
 
+  const saveEditedHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined): Promise<any> => {
+    const res = await storage.saveBlob(id, url, new Blob([html], {
+      type: 'text/html'
+    }), BlobType.EditedHTML, remark)
+    lastUpdate.value = new Date().getTime()
+    return res
+  }
+
   const saveMHtml = async (id: string, url: string, mhtml: Blob, remark: string | undefined = undefined): Promise<string> => {
     const res = await storage.saveBlob(id, url, mhtml, BlobType.MHTML, remark)
     lastUpdate.value = new Date().getTime()
@@ -95,6 +103,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     lastUpdate,
     metadata,
     saveHTML,
+    saveEditedHTML,
     saveMHtml,
     savePng,
     savePdf,

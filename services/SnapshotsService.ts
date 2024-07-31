@@ -19,50 +19,11 @@ export function useSnapshotsService() {
   }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
-
-
-    const warcVersion = "WARC/1.1";
-
-    const info = {
-      software: "warcio.js in browser",
-    };
-    const filename = "sample.warc";
-
-/*
-    const warcinfo = await WARCRecord.createWARCInfo(
-      {filename, warcVersion},
-      info
-    );
-
-    const serializedWARCInfo = await WARCSerializer.serialize(warcinfo);
-
-    // Create a sample response
-    const url2 = "http://example.com/";
-    const date = "2000-01-01T00:00:00Z";
-    const type = "response";
-    const httpHeaders = {
-      "Custom-Header": "somevalue",
-      "Content-Type": 'text/plain; charset="UTF-8"',
-    };
-
-    async function* content() {
-      // content should be a Uint8Array, so encoding if emitting astring
-      yield new TextEncoder().encode(html);
-    }
-
-    const record = await WARCRecord.create(
-      {url: url2, date, type, warcVersion, httpHeaders},
-      content()
-    );
-
-    const serializedRecord = await WARCSerializer.serialize(record);
-*/
-
-    // console.log(new TextDecoder().decode(serializedWARCInfo));
-    // console.log(new TextDecoder().decode(serializedRecord));
-
     await useSnapshotsStore().saveHTML(id, url, html, remark)
-    //await useSnapshotsStore().saveHTML(id, url, new TextDecoder().decode(serializedRecord), remark)
+  }
+
+  const saveEditedHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
+    await useSnapshotsStore().saveEditedHTML(id, url, html, remark)
   }
 
   const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
@@ -129,6 +90,7 @@ export function useSnapshotsService() {
     init,
     convertFrom,
     saveHTML,
+    saveEditedHTML,
     savePng,
     savePdf,
     screenshotFrom,
