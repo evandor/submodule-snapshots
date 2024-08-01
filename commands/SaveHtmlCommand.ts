@@ -1,5 +1,5 @@
 import Command from "src/core/domain/Command";
-import {ExecutionResult} from "src/core/domain/ExecutionResult";
+import {ExecutionFailureResult, ExecutionResult} from "src/core/domain/ExecutionResult";
 import _ from "lodash";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import ContentUtils from "src/core/utils/ContentUtils";
@@ -25,6 +25,9 @@ export class SaveHtmlCommand implements Command<string> {
             {},
             async (res) => {
               console.log("getContent returned result with length", res?.html, chromeTab.id)
+              if (!res || !res.html) {
+                return new ExecutionFailureResult("", "could not retrieve html")
+              }
               let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.html)
               console.log("----")
               console.log(html)
