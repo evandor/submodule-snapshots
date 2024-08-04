@@ -88,7 +88,7 @@ watchEffect(async () => {
     if (useSnapshotsStore().lastUpdate) {
       htmlMetadata.value = await useSnapshotsService().getMetadataById(snapshotId.value)
       console.log("metadata", htmlMetadata.value)
-      currentBlob.value = await useSnapshotsService().getBlobFor(htmlMetadata.value.blobId)
+      currentBlob.value = await useSnapshotsService().getBlobFor(htmlMetadata.value!.blobId)
       await setImage(0)
       //current.value = index
     }
