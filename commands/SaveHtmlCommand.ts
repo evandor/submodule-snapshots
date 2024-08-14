@@ -21,14 +21,15 @@ export class SaveHtmlCommand implements Command<string> {
 
           chrome.tabs.sendMessage(
             chromeTab.id || 0,
-            "getContent",
+            "getExcerpt",
             {},
             async (res) => {
-              console.log("getContent returned result with length", res?.html, chromeTab.id)
+              console.log("getContent returned result with length", res, res?.html.length, chromeTab.id)
               if (!res || !res.html) {
                 return new ExecutionFailureResult("", "could not retrieve html")
               }
               let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.html)
+              html = res.doctype + "\n" + html
               console.log("----")
               console.log(html)
               console.log("----")

@@ -32,7 +32,7 @@ export class SaveWarcCommand implements Command<any> {
 
         chrome.tabs.sendMessage(
             this.chromeTabId || 0,
-            "getContent",
+            "getExcerpt",
             {},
             (res) => {
                 console.log("getContent returned result with length", res?.content?.length, this.chromeTabId)

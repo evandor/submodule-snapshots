@@ -20,7 +20,7 @@ export class SavePdfCommand implements Command<string> {
 
       chrome.tabs.sendMessage(
         chromeTab.id || 0,
-        "getContent",
+        "getExcerpt",
         {},
         async (res) => {
          // console.log("msg: ",res)
@@ -50,7 +50,7 @@ export class SavePdfCommand implements Command<string> {
 
       // const res = await chrome.tabs.sendMessage(
       //   chrometab.id || 0,
-      //   "getcontent",
+      //   "getExcerpt",
       //   {})//,
       // //async (res) => {
       // console.log("getcontent returned result with length", res?.content?.length, chrometab.id)
