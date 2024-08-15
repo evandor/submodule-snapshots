@@ -51,6 +51,7 @@ import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
 import {useQuasar} from "quasar";
 import * as cheerio from "cheerio";
 import _ from "lodash"
+import {diffWords} from "diff";
 
 const route = useRoute()
 const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils()
@@ -82,6 +83,10 @@ onMounted(() => {
 
 
   proceedToPage.value = localStorage.getItem('ui.proceedToArchivedPage') || false
+
+  // document.onfocus = (e:any) => {
+  //   console.log("onFocus", e)
+  // }
 
   document.onpointerup = (e: any) => {
 
@@ -197,6 +202,115 @@ const loadArchivedPage = () => {
   document.open("text/html", "replace");
   document.write(htmlSnapshot.value);
   document.close();
+
+  console.log("adding listener")
+
+  document.addEventListener('focusin', function (e: FocusEvent) {
+    const target = e.target!
+    console.log('focusin!', window.location.href, e.target)
+    // console.log('focusin!', e.target?.innerHTML)
+    if (!window.location.href.startsWith("chrome-extension://")) {
+      return
+    }
+    if (window.location.href.indexOf('/www/index.html#/mainpanel/') < 0) {
+      return
+    }
+    console.log('focusin!', window.location.href, e)
+
+    // @ts-ignore
+    if (target.dataset.changedHtml) {
+      console.log("setting to changed HTML")
+      // @ts-ignore
+      target.innerHTML = target.dataset.changedHtml
+    } else {
+      // @ts-ignore
+      e.target.dataset.originalHtml = e.target.innerHTML
+    }
+    // @ts-ignore
+    console.log("set data to", e.target.dataset.originalHtml)
+  })
+
+  document.addEventListener('focusout', function (e: FocusEvent) {
+    const target = e.target!
+    console.log('focusout!', e)
+    console.log('focusout!', e.target)
+    if (!window.location.href.startsWith("chrome-extension://")) {
+      return
+    }
+    if (window.location.href.indexOf('/www/index.html#/mainpanel/') < 0) {
+      return
+    }
+
+    // console.log('focusout!', e.target.innerHTML)
+
+    // @ts-ignore
+    //const diff = diffChars(target.dataset.originalHtml || '', target.innerHTML);
+    const diff = diffWords(target.dataset.originalHtml || '', target.innerHTML);
+    // const diff = execute(e.target.dataset.originalHtml || '', e.target.innerHTML);
+    console.log("diff", diff)
+
+    let fragment = document.createDocumentFragment();
+    let html = ''
+    diff.forEach((part: any) => {
+      if (part.added) {
+        const span = document.createElement('span');
+        span.style.backgroundColor = "lightgreen";
+        var doc = new DOMParser().parseFromString(part.value, "text/html");
+        span.innerHTML = part.value
+        fragment.appendChild(span);
+        html += span.outerHTML
+      } else if (part.removed) {
+        const span = document.createElement('span');
+        span.style.backgroundColor = "lightred";
+        span.style.textDecoration = "line-through"
+        let doc = new DOMParser().parseFromString(part.value, "text/html");
+        span.innerHTML = part.value
+        fragment.appendChild(span);
+        html += span.outerHTML
+
+      } else {
+        html += part.value
+      }
+
+
+      // const color = part.added ? 'green' :
+      //   part.removed ? 'red' : 'grey';
+      // const span = document.createElement('span');
+      // span.style.backgroundColor = color;
+      // //console.log("part.value", part.value)
+      //
+      // var doc = new DOMParser().parseFromString(part.value, "text/html");
+      // // span.appendChild(doc.innerHTML);
+      // span.innerHTML = part.value
+      // console.log("span", span)
+      // fragment.appendChild(span);
+      //html += span.outerHTML
+
+    });
+
+    console.log("parsing", html)
+    const domFromHtml = new DOMParser().parseFromString(html, "text/html");
+
+
+    // @ts-ignore
+    target.dataset.changedHtml = target.innerHTML
+    // @ts-ignore
+    target.innerHTML = domFromHtml.body.innerHTML
+
+    sendMsg('snapshot-edited', {
+      html: document.documentElement.innerHTML,
+      path: document.location.hash
+    })
+
+    //target.appendChild(fragment.textContent)
+    // document.body.appendChild(fragment)
+    //  document.body.insertAdjacentHTML(
+    //    "beforeend",
+    //    div.innerHTML
+    //  );
+
+  })
+
   // document.body.insertAdjacentHTML('beforeend',htmlSnapshot.value);
 }
 
