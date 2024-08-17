@@ -57,9 +57,7 @@ const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils
 
 const snapshotId = ref<string>()
 const htmlMetadata = ref<BlobMetadata | undefined>(undefined)
-const html = ref<BlobMetadata | undefined>(undefined)
 const currentBlob = ref<Blob | undefined>(undefined)
-const current = ref(0)
 const htmlSnapshot = ref('loading...')
 const selectedText = ref<string | undefined>(undefined)
 const selection = ref<any>()
@@ -215,7 +213,7 @@ const setHtml = async () => {
       });
 
 
-      htmlSnapshot.value = $.html()
+      htmlSnapshot.value = htmlBlob//$.html()
 
     } else {
       htmlSnapshot.value = await currentBlob.value.text()

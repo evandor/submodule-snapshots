@@ -80,64 +80,7 @@ console.log("initialProceedtopage", initialProceedToPage)
 
 onMounted(() => {
   Analytics.firePageViewEvent('MainPanelHtmlPage', document.location.href)
-
-
   proceedToPage.value = localStorage.getItem('ui.proceedToArchivedPage') || false
-
-  // document.onfocus = (e:any) => {
-  //   console.log("onFocus", e)
-  // }
-
-  document.onpointerup = (e: any) => {
-
-    const mainOverlayElement = document.getElementById('mainOverlay');
-    const menuOverlayElement = document.getElementById('menuOverlay');
-
-    // avoid reacting on clicks on overlays
-    if (mainOverlayElement) {
-      if (!(e.target !== mainOverlayElement && !mainOverlayElement.contains(e.target))) {
-        return
-      }
-    }
-    if (menuOverlayElement) {
-      if (!(e.target !== menuOverlayElement && !menuOverlayElement.contains(e.target))) {
-        return
-      }
-    }
-
-    const documentSelection = document.getSelection()
-    //console.log("new selection:", documentSelection?.type, documentSelection)
-    selectedText.value = undefined
-    if (documentSelection?.type === "Range") {
-      console.log("selection changed!")
-      selection.value = documentSelection
-      const text = selection.value.toString();
-      console.log("===>", selection.value, text)
-      if (text !== "" && selection.value.rangeCount > 0) {
-        selectedText.value = text
-        //console.log("range", selection.value.getRangeAt(0))
-        serializedSelection.value = serializeSelection()
-        //console.log("===>", serializedSelection.value)
-        selectionRect.value = selection.value.getRangeAt(0).getBoundingClientRect();
-        //console.log("rect", selectionRect.value)
-        viewPort.value = {
-          width: document.body.scrollWidth,
-          height: document.body.scrollHeight// + document.body.scrollY
-        }
-        sendMsg('text-selection', {
-          snapshotId: snapshotId.value,
-          text: selectedText.value,
-          selection: serializedSelection.value,
-          rect: selectionRect.value,
-          viewPort: viewPort.value
-        })
-        // control.style.top = `calc(${rect.top}px - 48px)`;
-        // control.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`;
-        // control['text']= text;
-        // document.body.appendChild(control);
-      }
-    }
-  }
 })
 
 watchEffect(async () => {
@@ -312,6 +255,87 @@ const loadArchivedPage = () => {
   })
 
   // document.body.insertAdjacentHTML('beforeend',htmlSnapshot.value);
+
+  const css = document.createElement('style');
+  css.appendChild(document.createTextNode("::selection {color: red;background-color: yellow;}"));
+  document.head.appendChild(css);
+
+  const overlayDiv = document.createElement('div')
+  //overlayDiv.style.text = "position: absolute; left: 50%; top:20%"
+  overlayDiv.innerText = "Bibbly Snapshot!   "
+  overlayDiv.style.cssText = 'margin:3px 3px; padding:5px 5px; position:fixed;top:5px;right:5px;overflow-y:scroll;overflow-x:hidden;' +
+    'width:150px;border:2px solid red;border-radius:3px;z-index:2147483647;background-color:white';
+
+  const overlayImg = document.createElement('img')
+  overlayImg.src = "icons/favicon-32x32.png"
+  overlayImg.style.cssText = "height:12px"
+
+  const overlayBtn = document.createElement('button')
+  overlayBtn.id = "snapshots_edit_btn"
+  overlayBtn.type = "button"
+  overlayBtn.innerText = "Edit"
+  overlayBtn.onclick = function(){
+    document.location.href = document.location.href += "?edit=true"
+    document.location.reload()
+  };
+
+  overlayDiv.appendChild(overlayImg)
+
+  overlayDiv.appendChild(overlayBtn)
+
+ document.body.appendChild(overlayDiv)
+
+  document.onpointerup = (e: any) => {
+
+    const mainOverlayElement = document.getElementById('mainOverlay');
+    const menuOverlayElement = document.getElementById('menuOverlay');
+
+    // avoid reacting on clicks on overlays
+    if (mainOverlayElement) {
+      if (!(e.target !== mainOverlayElement && !mainOverlayElement.contains(e.target))) {
+        return
+      }
+    }
+    if (menuOverlayElement) {
+      if (!(e.target !== menuOverlayElement && !menuOverlayElement.contains(e.target))) {
+        return
+      }
+    }
+
+    const documentSelection = document.getSelection()
+    //console.log("new selection:", documentSelection?.type, documentSelection)
+    selectedText.value = undefined
+    if (documentSelection?.type === "Range") {
+      console.log("selection changed!")
+      selection.value = documentSelection
+      const text = selection.value.toString();
+      console.log("===>", selection.value, text)
+      if (text !== "" && selection.value.rangeCount > 0) {
+        selectedText.value = text
+        //console.log("range", selection.value.getRangeAt(0))
+        serializedSelection.value = serializeSelection()
+        //console.log("===>", serializedSelection.value)
+        selectionRect.value = selection.value.getRangeAt(0).getBoundingClientRect();
+        //console.log("rect", selectionRect.value)
+        viewPort.value = {
+          width: document.body.scrollWidth,
+          height: document.body.scrollHeight// + document.body.scrollY
+        }
+        sendMsg('text-selection', {
+          snapshotId: snapshotId.value,
+          text: selectedText.value,
+          selection: serializedSelection.value,
+          rect: selectionRect.value,
+          viewPort: viewPort.value
+        })
+        // control.style.top = `calc(${rect.top}px - 48px)`;
+        // control.style.left = `calc(${rect.left}px + calc(${rect.width}px / 2) - 40px)`;
+        // control['text']= text;
+        // document.body.appendChild(control);
+      }
+    }
+  }
+
 }
 
 watchEffect(async () => {

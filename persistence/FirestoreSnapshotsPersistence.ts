@@ -140,27 +140,6 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.resolve(mdId)
   }
 
-  // async saveMHtml(id: string, url: string, data: Blob, remark: string | undefined): Promise<any> {
-  //   console.log(`saving MHtml ${id}`)
-  //   const blobId = this.saveBlobToStorage(data);
-  //   const mdId = await this.saveMetadata(id, blobId, BlobType.MHTML, url, remark);
-  //   return Promise.resolve(mdId)
-  // }
-  //
-  // async savePng(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
-  //   console.log(`saving Png ${id}`)
-  //   const blobId = this.saveBlobToStorage(data);
-  //   const mdId = await this.saveMetadata(id, blobId, BlobType.PNG, url, remark);
-  //   return Promise.resolve(mdId)
-  // }
-  //
-  // async savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
-  //   console.log(`saving PDF ${id}`)
-  //   const blobId = this.saveBlobToStorage(data);
-  //   const mdId = await this.saveMetadata(id, blobId, BlobType.PDF, url, remark);
-  //   return Promise.resolve(mdId)
-  // }
-
   private async saveMetadata(id: string, blobId: string, blobType: BlobType, url: string, remark: string | undefined) {
     const mdId = uid()
     const md = new BlobMetadata(mdId, id, blobId, blobType, url, remark)
