@@ -51,6 +51,7 @@ import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
 import {useQuasar} from "quasar";
 import * as cheerio from "cheerio";
 import _ from "lodash"
+// @ts-ignore
 import {diffWords} from "diff";
 
 const route = useRoute()
