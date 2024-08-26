@@ -1,4 +1,4 @@
-import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where} from "firebase/firestore";
+import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where, updateDoc} from "firebase/firestore";
 import {LocalStorage, uid} from "quasar";
 import {APP_INSTALLATION_ID} from "boot/constants";
 import {useAuthStore} from "stores/authStore";
@@ -6,9 +6,9 @@ import FirebaseServices from "src/services/firebase/FirebaseServices";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
-import {useTabsetsStore} from "src/tabsets/stores/tabsetsStore";
-import {deleteObject, getBlob, ref, uploadBytes} from "firebase/storage";
+import {deleteObject, getBlob, getMetadata, listAll, ref, uploadBytes} from "firebase/storage";
 import _ from "lodash";
+import {ref as realtimeRef, update} from "firebase/database"
 
 const STORE_IDENT = 'snapshotmetadata';
 const BLOB_IDENT = 'snapshotblobs';
@@ -34,7 +34,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async init() {
-    console.debug(` ...initialized snapshots: ${this.getServiceName()}`,'✅')
+    console.debug(` ...initialized snapshots: ${this.getServiceName()}`, '✅')
     return Promise.resolve("")
   }
 
@@ -87,7 +87,9 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     }).catch((error) => {
       console.log("error", error)
     });
-    return deleteDoc(doc(FirebaseServices.getFirestore(), "users", useAuthStore().user.uid, STORE_IDENT, metadataId))
+    await deleteDoc(doc(FirebaseServices.getFirestore(), "users", useAuthStore().user.uid, STORE_IDENT, metadataId))
+    await this.updateStorageQuote()
+    return Promise.resolve()
   }
 
   async getBlobFor(id: string): Promise<Blob | undefined> {
@@ -135,8 +137,10 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
 
   async saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
     console.log(`saving Blob ${id}, type ${type}`)
-    const blobId = this.saveBlobToStorage(data);
-    const mdId = await this.saveMetadata(id, blobId,type, url, remark);
+    const blobId = await this.saveBlobToStorage(data);
+    const mdId = await this.saveMetadata(id, blobId, type, url, remark);
+
+    await this.updateStorageQuote();
     return Promise.resolve(mdId)
   }
 
@@ -148,12 +152,10 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
     return mdId;
   }
 
-  private saveBlobToStorage(data: Blob) {
+  private async saveBlobToStorage(data: Blob) {
     const blobId = uid()
     const storageReference = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs/${blobId}`);
-    uploadBytes(storageReference, data).then((snapshot: any) => {
-      console.log('Uploaded a blob or file!');
-    });
+    await uploadBytes(storageReference, data)
     return blobId;
   }
 
@@ -173,6 +175,28 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
 
+  private async saveQuote(quote: object) {
+    if (useAuthStore().user?.uid) {
+      const userDoc = doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid)
+      await updateDoc(userDoc, quote)
+    }
+  }
+
+  private async updateStorageQuote() {
+    const userSnapshots = ref(FirebaseServices.getStorage(), `users/${useAuthStore().user.uid}/snapshotBlobs`);
+    const res = await listAll(userSnapshots)
+    let size = 0
+    for (const itemRef of res.items) {
+      try {
+        const md = await getMetadata(itemRef)
+        size += md.size
+      } catch (err) {
+        // ignore, document might have been deleted
+      }
+    }
+    //console.log("size", size)
+    await this.saveQuote({snapshots: Math.round(100 * size / (1024 * 1024)) / 100})
+  }
 
 }
 

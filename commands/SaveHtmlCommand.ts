@@ -3,6 +3,7 @@ import {ExecutionFailureResult, ExecutionResult} from "src/core/domain/Execution
 import _ from "lodash";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import ContentUtils from "src/core/utils/ContentUtils";
+import {Readability} from "@mozilla/readability";
 
 export class SaveHtmlCommand implements Command<string> {
 
@@ -28,11 +29,19 @@ export class SaveHtmlCommand implements Command<string> {
               if (!res || !res.html) {
                 return new ExecutionFailureResult("", "could not retrieve html")
               }
-              let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.html)
+              // if (res.html) {
+              //   var doc = (new DOMParser).parseFromString(res.html, "text/html");
+              //   var article = new Readability(doc).parse();
+              //   console.log("article", article!.content)
+              // }
+
+
+               let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.html)
+              //let html = await ContentUtils.processHtml(tabCandidates[0].url || '', article!.content)
               html = res.doctype + "\n" + html
-              console.log("----")
-              console.log(html)
-              console.log("----")
+              // console.log("----")
+              // console.log(html)
+              // console.log("----")
               await useSnapshotsService().saveHTML(this.id, chromeTab.url || '', html)
               return new ExecutionResult(
                 "done",
