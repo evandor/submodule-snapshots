@@ -123,7 +123,6 @@ const setHtml = async () => {
 
     } else {
       htmlSnapshot.value = await currentBlob.value.text()
-      console.log("====>", htmlSnapshot.value)
     }
 
 
@@ -310,7 +309,6 @@ const loadArchivedPage = () => {
       console.log("selection changed!")
       selection.value = documentSelection
       const text = selection.value.toString();
-      console.log("===>", selection.value, text)
       if (text !== "" && selection.value.rangeCount > 0) {
         selectedText.value = text
         //console.log("range", selection.value.getRangeAt(0))
