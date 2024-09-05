@@ -1,6 +1,5 @@
-import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, where, updateDoc} from "firebase/firestore";
-import {LocalStorage, uid} from "quasar";
-import {APP_INSTALLATION_ID} from "boot/constants";
+import {collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
+import {uid} from "quasar";
 import {useAuthStore} from "stores/authStore";
 import FirebaseServices from "src/services/firebase/FirebaseServices";
 import {Annotation} from "src/snapshots/models/Annotation";
@@ -8,16 +7,8 @@ import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
 import {deleteObject, getBlob, getMetadata, listAll, ref, uploadBytes} from "firebase/storage";
 import _ from "lodash";
-import {ref as realtimeRef, update} from "firebase/database"
 
 const STORE_IDENT = 'snapshotmetadata';
-const BLOB_IDENT = 'snapshotblobs';
-
-const installationId = LocalStorage.getItem(APP_INSTALLATION_ID) as string || '---'
-
-function blobDoc(id: string) {
-  return doc(FirebaseServices.getFirestore(), "users", useAuthStore().user?.uid || 'x', BLOB_IDENT, id)
-}
 
 function metadataDoc(id: string) {
   return doc(FirebaseServices.getFirestore(), "users", useAuthStore().user.uid, STORE_IDENT, id)

@@ -60,7 +60,6 @@ const currentBlob = ref<Blob | undefined>(undefined)
 const tabId = ref<string>()
 const blobId = ref<string>()
 const pdfs = ref<SavedBlob[]>([])
-const pdf = ref<SavedBlob | undefined>(undefined)
 const current = ref(2)
 const pdfData = ref<any>()
 

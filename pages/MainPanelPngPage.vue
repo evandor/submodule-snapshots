@@ -58,7 +58,6 @@ const currentBlob = ref<Blob | undefined>(undefined)
 const tabId = ref<string>()
 const blobId = ref<string>()
 const pngs = ref<SavedBlob[]>([])
-const png = ref<SavedBlob | undefined>(undefined)
 const current = ref(2)
 
 onMounted(() => {

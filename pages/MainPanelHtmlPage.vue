@@ -55,14 +55,12 @@ import _ from "lodash"
 import {diffWords} from "diff";
 
 const route = useRoute()
-const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils()
+const {serializeSelection, sendMsg, restoreSelection} = useUtils()
 
 const snapshotId = ref<string>()
 const editable = ref<boolean>(route.query.edit as string === "true")
 const htmlMetadata = ref<BlobMetadata | undefined>(undefined)
-const html = ref<BlobMetadata | undefined>(undefined)
 const currentBlob = ref<Blob | undefined>(undefined)
-const current = ref(0)
 const htmlSnapshot = ref('loading...')
 const selectedText = ref<string | undefined>(undefined)
 const selection = ref<any>()
@@ -198,7 +196,7 @@ const loadArchivedPage = () => {
       if (part.added) {
         const span = document.createElement('span');
         span.style.backgroundColor = "lightgreen";
-        var doc = new DOMParser().parseFromString(part.value, "text/html");
+        //var doc = new DOMParser().parseFromString(part.value, "text/html");
         span.innerHTML = part.value
         fragment.appendChild(span);
         html += span.outerHTML
@@ -206,7 +204,7 @@ const loadArchivedPage = () => {
         const span = document.createElement('span');
         span.style.backgroundColor = "lightred";
         span.style.textDecoration = "line-through"
-        let doc = new DOMParser().parseFromString(part.value, "text/html");
+        //let doc = new DOMParser().parseFromString(part.value, "text/html");
         span.innerHTML = part.value
         fragment.appendChild(span);
         html += span.outerHTML

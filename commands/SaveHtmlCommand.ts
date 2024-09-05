@@ -3,7 +3,6 @@ import {ExecutionFailureResult, ExecutionResult} from "src/core/domain/Execution
 import _ from "lodash";
 import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 import ContentUtils from "src/core/utils/ContentUtils";
-import {Readability} from "@mozilla/readability";
 
 export class SaveHtmlCommand implements Command<string> {
 

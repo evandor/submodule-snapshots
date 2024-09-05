@@ -53,7 +53,7 @@ import {useQuasar} from "quasar";
 import * as cheerio from "cheerio";
 
 const route = useRoute()
-const {sanitizeAsHtml, serializeSelection, sendMsg, restoreSelection} = useUtils()
+const {serializeSelection, sendMsg, restoreSelection} = useUtils()
 
 const snapshotId = ref<string>()
 const htmlMetadata = ref<BlobMetadata | undefined>(undefined)

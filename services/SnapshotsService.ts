@@ -1,6 +1,6 @@
 import backendApi from "src/services/BackendApi";
 import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
-import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
+import {BlobMetadata} from "src/snapshots/models/BlobMetadata";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {uid} from "quasar";
 
