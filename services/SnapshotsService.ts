@@ -15,7 +15,8 @@ export function useSnapshotsService() {
   }
 
   const warcFrom = (html: string) => {
-    return backendApi.createWarc(html)
+    //return backendApi.createWarc(html)
+    throw new Error("not implemented")
   }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
@@ -55,7 +56,7 @@ export function useSnapshotsService() {
     return backendApi.createPng(html)
   }
 
-  const pdfFrom = (html: string) => {1
+  const pdfFrom = (html: string) => {
     return backendApi.createPdf(html)
   }
 
@@ -67,7 +68,7 @@ export function useSnapshotsService() {
                             rect: object, viewport: object, title: string,
                             comment: string | undefined,
                             color: string = 'grey'): Promise<Annotation[]> => {
-    // console.log("createAnnotation", tabId, index, selection, text, rect, viewport, comment)
+    console.log("createAnnotation", snapshotId, selection, text, rect, viewport, comment)
     const annotation = new Annotation(uid(), selection, text, rect, viewport, title, comment, color)
     return useSnapshotsStore().createAnnotation(snapshotId, annotation)
   }

@@ -79,11 +79,11 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return await this.db.get(this.BLOBS_STORE_IDENT,id) as Blob
   }
 
-  async addAnnotation(snapshotId: string, annotation: Annotation): Promise<Annotation[]> {
-    const res = await this.db.get(this.META_STORE_IDENT, snapshotId) as BlobMetadata
-    console.log(`adding annotation for ${snapshotId} to `, res)
+  async addAnnotation(metadataId: string, annotation: Annotation): Promise<Annotation[]> {
+    const res = await this.db.get(this.META_STORE_IDENT, metadataId) as BlobMetadata
+    console.log(`adding annotation for ${metadataId} to `, res)
     res.annotations.push(annotation)
-    await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), snapshotId)
+    await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), metadataId)
     return res.annotations
   }
 
