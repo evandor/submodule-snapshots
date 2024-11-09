@@ -1,7 +1,6 @@
 import Command from "src/core/domain/Command";
 import {ExecutionResult} from "src/core/domain/ExecutionResult";
 import _ from "lodash";
-import {useSnapshotsService} from "src/snapshots/services/SnapshotsService";
 
 export class SaveWarcCommand implements Command<string> {
 
@@ -26,22 +25,22 @@ export class SaveWarcCommand implements Command<string> {
         async (res) => {
           console.log("getContent returned result with length", res?.html?.length, chromeTab.id)
           // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
-          let html = res.html
-          return useSnapshotsService().warcFrom(html)
-            .then((res: any) => {
-              console.log("res", res, typeof res)
-              console.log("res2", typeof res.data)
-
-              useSnapshotsService().saveWarc(this.id, chromeTab.url || '', res.data)
-              // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
-
-              return new ExecutionResult(
-                "done",
-                "Warc created")
-            }).catch((err: any) => {
-              console.warn("got error: ", err)
-              //return handleError(err)
-            })
+         // let html = res.html
+          // return useSnapshotsService().warcFrom(html)
+          //   .then((res: any) => {
+          //     console.log("res", res, typeof res)
+          //     console.log("res2", typeof res.data)
+          //
+          //     useSnapshotsService().saveWarc(this.id, chromeTab.url || '', res.data)
+          //     // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
+          //
+          //     return new ExecutionResult(
+          //       "done",
+          //       "Warc created")
+          //   }).catch((err: any) => {
+          //     console.warn("got error: ", err)
+          //     //return handleError(err)
+          //   })
 
 
         })
