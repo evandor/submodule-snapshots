@@ -16,7 +16,7 @@ export function useSnapshotsService() {
 
   const warcFrom = (html: string) => {
     //return backendApi.createWarc(html)
-    throw new Error("not implemented")
+    throw new Error("not implemented H")
   }
 
   const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {

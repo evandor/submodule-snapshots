@@ -129,7 +129,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     // await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
     // const metadata = new BlobMetadata(id, blobId, BlobType.MHTML, url, remark)
     // await this.db.put(this.META_STORE_IDENT, metadata, uid())
-    return Promise.reject("not implemented")
+    return Promise.reject("not implemented G")
   }
 
   async saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
