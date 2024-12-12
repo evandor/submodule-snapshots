@@ -19,11 +19,11 @@ export class SavePngCommand implements Command<string> {
           const chromeTab = tabCandidates[0]
 
           chrome.tabs.sendMessage(
-            chromeTab.id || 0,
+            chromeTab!.id || 0,
             "getExcerpt",
             {},
             async (res) => {
-              console.log("getContent returned result with length", res?.html?.length, chromeTab.id)
+              console.log("getContent returned result with length", res?.html?.length, chromeTab!.id)
               // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
               let html = res.html
               return useSnapshotsService().screenshotFrom(html)
@@ -31,7 +31,7 @@ export class SavePngCommand implements Command<string> {
                   console.log("res", res, typeof res)
                   console.log("res2", typeof res.data)
 
-                  useSnapshotsService().savePng(this.id, chromeTab.url || '', res.data)
+                  useSnapshotsService().savePng(this.id, chromeTab!.url || '', res.data)
                   // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
 
                   return new ExecutionResult(

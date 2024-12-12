@@ -14,7 +14,7 @@ export class SaveMHtmlCommand implements Command<string> {
       .then((tabs: chrome.tabs.Tab[]) => {
         const tabCandidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === this.url)
         if (tabCandidates.length > 0) {
-          const captureDetails = {tabId: tabCandidates[0].id || 0}
+          const captureDetails = {tabId: tabCandidates[0]!.id || 0}
           console.log("about to capture", captureDetails)
           chrome.pageCapture.saveAsMHTML(captureDetails, async (html: Blob | undefined) => {
             //console.log("blob", html)

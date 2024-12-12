@@ -20,11 +20,11 @@ export class SaveHtmlCommand implements Command<string> {
           const chromeTab = tabCandidates[0]
 
           chrome.tabs.sendMessage(
-            chromeTab.id || 0,
+            chromeTab!.id || 0,
             "getExcerpt",
             {},
             async (res) => {
-              console.log("getContent returned result with length", res, res?.html.length, chromeTab.id)
+              console.log("getContent returned result with length", res, res?.html.length, chromeTab!.id)
               if (!res || !res.html) {
                 return new ExecutionFailureResult("", "could not retrieve html")
               }
@@ -35,13 +35,13 @@ export class SaveHtmlCommand implements Command<string> {
               // }
 
 
-               let html = await ContentUtils.processHtml(tabCandidates[0].url || '', res.html)
+               let html = await ContentUtils.processHtml(tabCandidates[0]!.url || '', res.html)
               //let html = await ContentUtils.processHtml(tabCandidates[0].url || '', article!.content)
               html = res.doctype + "\n" + html
               // console.log("----")
               // console.log(html)
               // console.log("----")
-              await useSnapshotsService().saveHTML(this.id, chromeTab.url || '', html)
+              await useSnapshotsService().saveHTML(this.id, chromeTab!.url || '', html)
               return new ExecutionResult(
                 "done",
                 "Snapshot created")
