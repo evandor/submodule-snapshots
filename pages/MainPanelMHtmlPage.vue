@@ -25,7 +25,7 @@
           <q-checkbox label="skip future acknowledgments" v-model="proceedToPage"></q-checkbox>
         </div>
         <div class="col q-my-md" v-if="!initialProceedToPage">
-          <span class="cursor-pointer text-blue-10 text-bold" @click="loadArchivedPage()">Got it!</span>
+          <span class="cursor-pointer text-accent text-bold" @click="loadArchivedPage()">Got it!</span>
         </div>
         <div class="col q-my-md" v-if="initialProceedToPage && htmlMetadata?.url">
           redirecting...
