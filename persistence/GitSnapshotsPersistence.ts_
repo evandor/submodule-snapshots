@@ -6,7 +6,7 @@ import LightningFS from '@isomorphic-git/lightning-fs';
 import http from 'isomorphic-git/http/web'
 import * as git from 'isomorphic-git'
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
-import {useAuthStore} from "stores/authStore";
+import {useAuthStore} from "src/stores/authStore";
 import {Md5} from "ts-md5";
 import {LocalStorage} from "quasar";
 import {NotificationType, useNotificationHandler} from "src/core/services/ErrorHandler";
