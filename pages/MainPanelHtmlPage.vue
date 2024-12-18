@@ -51,7 +51,7 @@ import {useSnapshotsStore} from "src/snapshots/stores/SnapshotsStore";
 import {useQuasar} from "quasar";
 import * as cheerio from "cheerio";
 import _ from "lodash"
-// @ts-expect-error
+// @ts-expect-error TODO
 import {diffWords} from "diff";
 
 const route = useRoute()
@@ -158,16 +158,16 @@ const loadArchivedPage = () => {
     }
     console.log('focusin!', window.location.href, e)
 
-    // @ts-expect-error
+    // @ts-expect-error TODO
     if (target.dataset.changedHtml) {
       console.log("setting to changed HTML")
-      // @ts-expect-error
+      // @ts-expect-error TODO
       target.innerHTML = target.dataset.changedHtml
     } else {
-      // @ts-expect-error
+      // @ts-expect-error TODO
       e.target.dataset.originalHtml = e.target.innerHTML
     }
-    // @ts-expect-error
+    // @ts-expect-error TODO
     console.log("set data to", e.target.dataset.originalHtml)
   })
 
@@ -184,7 +184,7 @@ const loadArchivedPage = () => {
 
     // console.log('focusout!', e.target.innerHTML)
 
-    // @ts-expect-error
+    // @ts-expect-error TODO
     //const diff = diffChars(target.dataset.originalHtml || '', target.innerHTML);
     const diff = diffWords(target.dataset.originalHtml || '', target.innerHTML);
     // const diff = execute(e.target.dataset.originalHtml || '', e.target.innerHTML);
@@ -233,9 +233,9 @@ const loadArchivedPage = () => {
     const domFromHtml = new DOMParser().parseFromString(html, "text/html");
 
 
-    // @ts-expect-error
+    // @ts-expect-error TODO
     target.dataset.changedHtml = target.innerHTML
-    // @ts-expect-error
+    // @ts-expect-error TODO
     target.innerHTML = domFromHtml.body.innerHTML
 
     sendMsg('snapshot-edited', {
