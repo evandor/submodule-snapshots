@@ -17,35 +17,35 @@ export class SaveHtmlCommand implements Command<string> {
         if (tabCandidates.length > 0) {
           console.log("about to capture html")
 
-          const chromeTab = tabCandidates[0]
-
-          chrome.tabs.sendMessage(
-            chromeTab!.id || 0,
-            "getExcerpt",
-            {},
-            async (res) => {
-              console.log("getContent returned result with length", res, res?.html.length, chromeTab!.id)
-              if (!res || !res.html) {
-                return new ExecutionFailureResult("", "could not retrieve html")
-              }
-              // if (res.html) {
-              //   var doc = (new DOMParser).parseFromString(res.html, "text/html");
-              //   var article = new Readability(doc).parse();
-              //   console.log("article", article!.content)
-              // }
-
-
-               let html = await ContentUtils.processHtml(tabCandidates[0]!.url || '', res.html)
-              //let html = await ContentUtils.processHtml(tabCandidates[0].url || '', article!.content)
-              html = res.doctype + "\n" + html
-              // console.log("----")
-              // console.log(html)
-              // console.log("----")
-              await useSnapshotsService().saveHTML(this.id, chromeTab!.url || '', html)
-              return new ExecutionResult(
-                "done",
-                "Snapshot created")
-            })
+          // const chromeTab = tabCandidates[0]
+          //
+          // chrome.tabs.sendMessage(
+          //   chromeTab!.id || 0,
+          //   "getExcerpt",
+          //   {},
+          //   async (res) => {
+          //     console.log("getContent returned result with length", res, res?.html.length, chromeTab!.id)
+          //     if (!res || !res.html) {
+          //       return new ExecutionFailureResult("", "could not retrieve html")
+          //     }
+          //     // if (res.html) {
+          //     //   var doc = (new DOMParser).parseFromString(res.html, "text/html");
+          //     //   var article = new Readability(doc).parse();
+          //     //   console.log("article", article!.content)
+          //     // }
+          //
+          //
+          //      let html = await ContentUtils.processHtml(tabCandidates[0]!.url || '', res.html)
+          //     //let html = await ContentUtils.processHtml(tabCandidates[0].url || '', article!.content)
+          //     html = res.doctype + "\n" + html
+          //     // console.log("----")
+          //     // console.log(html)
+          //     // console.log("----")
+          //     await useSnapshotsService().saveHTML(this.id, chromeTab!.url || '', html)
+          //     return new ExecutionResult(
+          //       "done",
+          //       "Snapshot created")
+          //   })
 
 
           return new ExecutionResult("trying to save", "trying to save")
