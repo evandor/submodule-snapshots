@@ -1,11 +1,10 @@
-import {defineStore} from 'pinia';
-import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
-import {ref} from "vue";
-import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
-import {Annotation} from "src/snapshots/models/Annotation";
+import { defineStore } from 'pinia'
+import SnapshotsPersistence from 'src/snapshots/persistence/SnapshotsPersistence'
+import { ref } from 'vue'
+import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
+import { Annotation } from 'src/snapshots/models/Annotation'
 
 export const useSnapshotsStore = defineStore('snapshots', () => {
-
   let storage: SnapshotsPersistence = null as unknown as SnapshotsPersistence
 
   const metadata = ref<BlobMetadata[]>([])
@@ -17,44 +16,86 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     await storage.init()
     metadata.value = await storage.getMetadata()
     lastUpdate.value = new Date().getTime()
-    console.debug(" ...initialized snapshots: Store",'✅')
+    console.debug(' ...initialized snapshots: Store', '✅')
   }
 
-  const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined): Promise<any> => {
-    const res = await storage.saveBlob(id, url, new Blob([html], {
-      type: 'text/html'
-    }), BlobType.HTML, remark)
+  const saveHTML = async (
+    id: string,
+    url: string,
+    html: string,
+    remark: string | undefined = undefined,
+  ): Promise<any> => {
+    const res = await storage.saveBlob(
+      id,
+      url,
+      new Blob([html], {
+        type: 'text/html',
+      }),
+      BlobType.HTML,
+      remark,
+    )
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const saveEditedHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined): Promise<any> => {
-    const res = await storage.saveBlob(id, url, new Blob([html], {
-      type: 'text/html'
-    }), BlobType.EditedHTML, remark)
+  const saveEditedHTML = async (
+    id: string,
+    url: string,
+    html: string,
+    remark: string | undefined = undefined,
+  ): Promise<any> => {
+    const res = await storage.saveBlob(
+      id,
+      url,
+      new Blob([html], {
+        type: 'text/html',
+      }),
+      BlobType.EditedHTML,
+      remark,
+    )
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const saveMHtml = async (id: string, url: string, mhtml: Blob, remark: string | undefined = undefined): Promise<string> => {
+  const saveMHtml = async (
+    id: string,
+    url: string,
+    mhtml: Blob,
+    remark: string | undefined = undefined,
+  ): Promise<string> => {
     const res = await storage.saveBlob(id, url, mhtml, BlobType.MHTML, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
+  const savePng = async (
+    id: string,
+    url: string,
+    img: Blob,
+    remark: string | undefined = undefined,
+  ): Promise<any> => {
     const res = storage.saveBlob(id, url, img, BlobType.PNG, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
+  const savePdf = async (
+    id: string,
+    url: string,
+    img: Blob,
+    remark: string | undefined = undefined,
+  ): Promise<any> => {
     const res = storage.saveBlob(id, url, img, BlobType.PDF, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const saveWarc = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
+  const saveWarc = async (
+    id: string,
+    url: string,
+    img: Blob,
+    remark: string | undefined = undefined,
+  ): Promise<any> => {
     const res = storage.saveBlob(id, url, img, BlobType.WARC, remark)
     lastUpdate.value = new Date().getTime()
     return res
@@ -72,24 +113,34 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
   }
 
   const blobFor = (id: string): Promise<Blob | undefined> => {
-      return storage.getBlobFor(id)
+    return storage.getBlobFor(id)
   }
 
   const deleteBlob = async (blobId: string) => {
-    console.log("deleting blob", blobId)
+    console.log('deleting blob', blobId)
     await storage.deleteBlob(blobId)
     lastUpdate.value = new Date().getTime()
   }
 
-  const createAnnotation = async (snapshotId: string, annotation: Annotation): Promise<Annotation[]> => {
+  const createAnnotation = async (
+    snapshotId: string,
+    annotation: Annotation,
+  ): Promise<Annotation[]> => {
     return await storage.addAnnotation(snapshotId, annotation)
   }
 
-  const updateAnnotation = async (tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> => {
+  const updateAnnotation = async (
+    tabId: string,
+    index: number,
+    annotation: Annotation,
+  ): Promise<Annotation[]> => {
     return await storage.updateAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = async (metadataId: string, toDelete: Annotation): Promise<Annotation[]> => {
+  const deleteAnnotation = async (
+    metadataId: string,
+    toDelete: Annotation,
+  ): Promise<Annotation[]> => {
     return storage.deleteAnnotation(metadataId, toDelete)
   }
 
@@ -115,6 +166,6 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     updateAnnotation,
     deleteAnnotation,
     deleteMetadataForSource,
-    saveWarc
+    saveWarc,
   }
 })

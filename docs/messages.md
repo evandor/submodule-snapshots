@@ -6,4 +6,4 @@ none
 
 ### Out
 
-* snapshot-captured
+- snapshot-captured

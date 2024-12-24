@@ -1,8 +1,7 @@
-import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
-import {Annotation} from "src/snapshots/models/Annotation";
+import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
+import { Annotation } from 'src/snapshots/models/Annotation'
 
 interface SnapshotsPersistence {
-
   // --- generic ---
   getServiceName(): string
   init(): Promise<any>
@@ -22,7 +21,13 @@ interface SnapshotsPersistence {
   // // ok (indexeddb)
   // savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
-  saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
+  saveBlob(
+    id: string,
+    url: string,
+    data: Blob,
+    type: BlobType,
+    remark: string | undefined,
+  ): Promise<string>
 
   // --- managing metadata ---
 
@@ -52,8 +57,7 @@ interface SnapshotsPersistence {
 
   updateAnnotation(tabId: string, index: number, annotation: Annotation): Promise<Annotation[]>
 
-  deleteAnnotation(metadataId: string, toDelete: Annotation): Promise<Annotation[]>;
-
+  deleteAnnotation(metadataId: string, toDelete: Annotation): Promise<Annotation[]>
 }
 
 export default SnapshotsPersistence

@@ -1,16 +1,15 @@
-import {IDBPDatabase, openDB} from "idb";
-import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
-import _ from "lodash"
-import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
-import {Annotation} from "src/snapshots/models/Annotation";
-import {uid} from "quasar";
+import { IDBPDatabase, openDB } from 'idb'
+import SnapshotsPersistence from 'src/snapshots/persistence/SnapshotsPersistence'
+import _ from 'lodash'
+import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
+import { Annotation } from 'src/snapshots/models/Annotation'
+import { uid } from 'quasar'
 
 class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
-
   private db: IDBPDatabase = null as unknown as IDBPDatabase
 
-  private BLOBS_STORE_IDENT = 'blobs';
-  private META_STORE_IDENT = 'metadata';
+  private BLOBS_STORE_IDENT = 'blobs'
+  private META_STORE_IDENT = 'metadata'
 
   getServiceName(): string {
     return this.constructor.name
@@ -18,33 +17,31 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
 
   async init() {
     this.db = await this.initDatabase()
-    console.debug(` ...initialized snapshots: ${this.getServiceName()}`,'✅')
+    console.debug(` ...initialized snapshots: ${this.getServiceName()}`, '✅')
     return Promise.resolve()
   }
 
   private async initDatabase(): Promise<IDBPDatabase> {
     const ctx = this
-    return await openDB("snapshotsDB", 1, {
+    return await openDB('snapshotsDB', 1, {
       upgrade(db) {
         if (!db.objectStoreNames.contains(ctx.BLOBS_STORE_IDENT)) {
-          console.log("creating db " + ctx.BLOBS_STORE_IDENT)
-          db.createObjectStore(ctx.BLOBS_STORE_IDENT);
+          console.log('creating db ' + ctx.BLOBS_STORE_IDENT)
+          db.createObjectStore(ctx.BLOBS_STORE_IDENT)
         }
         if (!db.objectStoreNames.contains(ctx.META_STORE_IDENT)) {
-          console.log("creating db " + ctx.META_STORE_IDENT)
-          const store = db.createObjectStore(ctx.META_STORE_IDENT);
-          store.createIndex("sourceId", "sourceId", {unique: false});
+          console.log('creating db ' + ctx.META_STORE_IDENT)
+          const store = db.createObjectStore(ctx.META_STORE_IDENT)
+          store.createIndex('sourceId', 'sourceId', { unique: false })
         }
-      }
-    });
+      },
+    })
   }
 
-
-  clear(name: string): void {
-  }
+  clear(name: string): void {}
 
   compactDb(): Promise<any> {
-    return Promise.resolve(undefined);
+    return Promise.resolve(undefined)
   }
 
   async deleteBlob(blobId: string) {
@@ -76,27 +73,31 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async getBlobFor(id: string): Promise<Blob> {
-    return await this.db.get(this.BLOBS_STORE_IDENT,id) as Blob
+    return (await this.db.get(this.BLOBS_STORE_IDENT, id)) as Blob
   }
 
   async addAnnotation(metadataId: string, annotation: Annotation): Promise<Annotation[]> {
-    const res = await this.db.get(this.META_STORE_IDENT, metadataId) as BlobMetadata
+    const res = (await this.db.get(this.META_STORE_IDENT, metadataId)) as BlobMetadata
     console.log(`adding annotation for ${metadataId} to `, res)
     res.annotations.push(annotation)
     await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), metadataId)
     return res.annotations
   }
 
-  async updateAnnotation(sourceId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
-    const res = await this.db.get(this.META_STORE_IDENT, sourceId) as BlobMetadata[]
-    console.log("updating annotation", res, index)
+  async updateAnnotation(
+    sourceId: string,
+    index: number,
+    annotation: Annotation,
+  ): Promise<Annotation[]> {
+    const res = (await this.db.get(this.META_STORE_IDENT, sourceId)) as BlobMetadata[]
+    console.log('updating annotation', res, index)
     if (res[index]!.annotations) {
-      const annotationIndex = _.findIndex(res[index]!.annotations, {id: annotation.id})
+      const annotationIndex = _.findIndex(res[index]!.annotations, { id: annotation.id })
       if (annotationIndex >= 0) {
         res[index]!.annotations[annotationIndex] = annotation
       }
     } else {
-      throw new Error("annotation not found")
+      throw new Error('annotation not found')
     }
     await this.db.put(this.META_STORE_IDENT, JSON.parse(JSON.stringify(res)), sourceId)
     return res[index]!.annotations
@@ -113,7 +114,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async deleteMetadataForSource(snapshotId: string) {
-    const snapshot = await this.db.get(this.META_STORE_IDENT, snapshotId) as BlobMetadata
+    const snapshot = (await this.db.get(this.META_STORE_IDENT, snapshotId)) as BlobMetadata
     if (snapshot) {
       await this.db.delete(this.BLOBS_STORE_IDENT, snapshot.blobId)
     }
@@ -124,15 +125,27 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
    * add metadata for id; push to array if already existing
    * // TODO transaction
    */
-  async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
+  async saveHTML(
+    id: string,
+    url: string,
+    data: Blob,
+    type: BlobType,
+    remark: string | undefined,
+  ): Promise<any> {
     // const blobId = uid()
     // await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
     // const metadata = new BlobMetadata(id, blobId, BlobType.MHTML, url, remark)
     // await this.db.put(this.META_STORE_IDENT, metadata, uid())
-    return Promise.reject("not implemented G")
+    return Promise.reject('not implemented G')
   }
 
-  async saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
+  async saveBlob(
+    id: string,
+    url: string,
+    data: Blob,
+    type: BlobType,
+    remark: string | undefined,
+  ): Promise<string> {
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
 
@@ -161,7 +174,6 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   //   await this.db.put(this.META_STORE_IDENT, metadata, mdId)
   //   return Promise.resolve(mdId)
   // }
-
 }
 
 export default new IndexedDbSnapshotsPersistence()

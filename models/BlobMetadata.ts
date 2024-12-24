@@ -1,16 +1,15 @@
-import {Annotation} from "src/snapshots/models/Annotation";
+import { Annotation } from 'src/snapshots/models/Annotation'
 
 export enum BlobType {
-  PNG = "PNG",
-  PDF = "PDF",
-  MHTML = "MHTML",
-  HTML = "HTML",
-  EditedHTML = "EditedHTML",
-  WARC = "WARC"
+  PNG = 'PNG',
+  PDF = 'PDF',
+  MHTML = 'MHTML',
+  HTML = 'HTML',
+  EditedHTML = 'EditedHTML',
+  WARC = 'WARC',
 }
 
 export class BlobMetadata {
-
   created: number
 
   constructor(
@@ -20,8 +19,8 @@ export class BlobMetadata {
     public type: BlobType,
     public url: string,
     public remark: string | undefined = undefined,
-    public annotations: Annotation[] = []) {
+    public annotations: Annotation[] = [],
+  ) {
     this.created = new Date().getTime()
   }
-
 }
