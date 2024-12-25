@@ -33,7 +33,7 @@
 
 <script lang="ts" setup>
 import * as cheerio from 'cheerio'
-// @ts-ignore
+// @ts-expect-error TODO
 import { diffWords } from 'diff'
 import _ from 'lodash'
 import { useQuasar } from 'quasar'
@@ -155,16 +155,16 @@ const loadArchivedPage = () => {
     }
     console.log('focusin!', window.location.href, e)
 
-    // @ts-ignore
+    // @ts-expect-error TODO
     if (target.dataset.changedHtml) {
       console.log('setting to changed HTML')
-      // @ts-ignore
+      // @ts-expect-error TODO
       target.innerHTML = target.dataset.changedHtml
     } else {
-      // @ts-ignore
+      // @ts-expect-error TODO
       e.target.dataset.originalHtml = e.target.innerHTML
     }
-    // @ts-ignore
+    // @ts-expect-error TODO
     console.log('set data to', e.target.dataset.originalHtml)
   })
 
@@ -181,7 +181,7 @@ const loadArchivedPage = () => {
 
     // console.log('focusout!', e.target.innerHTML)
 
-    // @ts-ignore
+    // @ts-expect-error TODO
     //const diff = diffChars(target.dataset.originalHtml || '', target.innerHTML);
     const diff = diffWords(target.dataset.originalHtml || '', target.innerHTML)
     // const diff = execute(e.target.dataset.originalHtml || '', e.target.innerHTML);
@@ -226,9 +226,9 @@ const loadArchivedPage = () => {
     console.log('parsing', html)
     const domFromHtml = new DOMParser().parseFromString(html, 'text/html')
 
-    // @ts-ignore
+    // @ts-expect-error TODO
     target.dataset.changedHtml = target.innerHTML
-    // @ts-ignore
+    // @ts-expect-error TODO
     target.innerHTML = domFromHtml.body.innerHTML
 
     sendMsg('snapshot-edited', {

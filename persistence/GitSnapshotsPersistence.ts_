@@ -1,12 +1,12 @@
 import SnapshotsPersistence from "src/snapshots/persistence/SnapshotsPersistence";
 import {Annotation} from "src/snapshots/models/Annotation";
 import {Buffer} from "buffer";
-// @ts-ignore
+// @ts-expect-error TODO
 import LightningFS from '@isomorphic-git/lightning-fs';
 import http from 'isomorphic-git/http/web'
 import * as git from 'isomorphic-git'
 import {BlobMetadata, BlobType} from "src/snapshots/models/BlobMetadata";
-import {useAuthStore} from "stores/authStore";
+import {useAuthStore} from "src/stores/authStore";
 import {Md5} from "ts-md5";
 import {LocalStorage} from "quasar";
 import {NotificationType, useNotificationHandler} from "src/core/services/ErrorHandler";
@@ -23,11 +23,11 @@ async function createDir(...segments: string[]) {
   let prefix = ''
   for (const segment of segments) {
     try {
-      // @ts-ignore
+      // @ts-expect-error TODO
       const path = `${dir}/${prefix}${segment}`
       //console.debug("creating fs path", path)
       prefix += segment + "/"
-      // @ts-ignore
+      // @ts-expect-error TODO
       await pfs.mkdir(path)
     } catch (err: any) {
       if (!err.toString().startsWith("Error: EEXIST")) {
@@ -39,7 +39,7 @@ async function createDir(...segments: string[]) {
 
 async function push(dir: string, proxy: string) {
   let pushResult = await git.push({
-    // @ts-ignore
+    // @ts-expect-error TODO
     fs,
     http,
     dir,
@@ -53,7 +53,7 @@ async function push(dir: string, proxy: string) {
 
 async function pull(dir: string, proxy: string, author: object) {
   let pullResult = await git.pull({
-    // @ts-ignore
+    // @ts-expect-error TODO
     fs,
     http,
     dir,
@@ -109,18 +109,18 @@ class GitSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   private async initDatabase(url: string, proxy: string, dir: string = this._dir): Promise<any> {
-    // @ts-ignore
+    // @ts-expect-error TODO
     window.fs = new LightningFS('fs')
-    // @ts-ignore
+    // @ts-expect-error TODO
     window.pfs = window.fs.promises
     console.debug("about to initialize git")
     const useDir = dir + "-" + Md5.hashStr(url)
-    // @ts-ignore
+    // @ts-expect-error TODO
     window.dir = useDir
     console.log(useDir);
     this.useProxy = proxy
     try {
-      // @ts-ignore
+      // @ts-expect-error TODO
       await pfs.mkdir(useDir);
     } catch (err: any) {
       if (!err.toString().startsWith("Error: EEXIST")) {

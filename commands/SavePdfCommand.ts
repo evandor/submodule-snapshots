@@ -19,27 +19,33 @@ export class SavePdfCommand implements Command<string> {
 
       const chromeTab = tabcandidates[0]
 
-      chrome.tabs.sendMessage(chromeTab.id || 0, 'getExcerpt', {}, async (res) => {
-        // console.log("msg: ",res)
-        console.log('getContent returned result with length', res?.html?.length, chromeTab.id)
-        // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
-        let html = res.html
-        return useSnapshotsService()
-          .pdfFrom(html)
-          .then((res: any) => {
-            console.log('res', res, typeof res)
-            console.log('res2', typeof res.data)
-
-            useSnapshotsService().savePdf(this.id, chromeTab.url || '', res.data)
-            // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
-
-            return new ExecutionResult('done', 'PDF created')
-          })
-          .catch((err: any) => {
-            console.warn('got error: ', err)
-            //return handleError(err)
-          })
-      })
+      // chrome.tabs.sendMessage(
+      //   chromeTab!.id || 0,
+      //   "getExcerpt",
+      //   {},
+      //   async (res) => {
+      //    // console.log("msg: ",res)
+      //     console.log("getContent returned result with length", res?.html?.length, chromeTab!.id)
+      //     // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
+      //     let html = res.html
+      //     return useSnapshotsService().pdfFrom(html)
+      //       .then((res: any) => {
+      //         console.log("res", res, typeof res)
+      //         console.log("res2", typeof res.data)
+      //
+      //         useSnapshotsService().savePdf(this.id, chromeTab!.url || '', res.data)
+      //         // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
+      //
+      //         return new ExecutionResult(
+      //           "done",
+      //           "PDF created")
+      //       }).catch((err: any) => {
+      //         console.warn("got error: ", err)
+      //         //return handleError(err)
+      //       })
+      //
+      //
+      //   })
 
       // const res = await chrome.tabs.sendMessage(
       //   chrometab.id || 0,
