@@ -9,14 +9,14 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore'
+import { deleteObject, getBlob, getMetadata, listAll, ref, uploadBytes } from 'firebase/storage'
+import _ from 'lodash'
 import { uid } from 'quasar'
-import { useAuthStore } from 'stores/authStore'
 import FirebaseServices from 'src/services/firebase/FirebaseServices'
 import { Annotation } from 'src/snapshots/models/Annotation'
 import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
 import SnapshotsPersistence from 'src/snapshots/persistence/SnapshotsPersistence'
-import { deleteObject, getBlob, getMetadata, listAll, ref, uploadBytes } from 'firebase/storage'
-import _ from 'lodash'
+import { useAuthStore } from 'stores/authStore'
 
 const STORE_IDENT = 'snapshotmetadata'
 

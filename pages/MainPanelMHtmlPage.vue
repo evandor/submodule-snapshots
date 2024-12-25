@@ -32,17 +32,17 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watchEffect } from 'vue'
-import { useRoute } from 'vue-router'
-import Analytics from 'src/core/utils/google-analytics'
-import { useUtils } from 'src/core/services/Utils'
-import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
-import { BlobMetadata } from 'src/snapshots/models/BlobMetadata'
-import { Annotation } from 'src/snapshots/models/Annotation'
-import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
+import * as cheerio from 'cheerio'
 import mhtml2html from 'mhtml2html'
 import { useQuasar } from 'quasar'
-import * as cheerio from 'cheerio'
+import { useUtils } from 'src/core/services/Utils'
+import Analytics from 'src/core/utils/google-analytics'
+import { Annotation } from 'src/snapshots/models/Annotation'
+import { BlobMetadata } from 'src/snapshots/models/BlobMetadata'
+import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
+import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
+import { onMounted, ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const { serializeSelection, sendMsg, restoreSelection } = useUtils()

@@ -1,9 +1,9 @@
 import { IDBPDatabase, openDB } from 'idb'
-import SnapshotsPersistence from 'src/snapshots/persistence/SnapshotsPersistence'
 import _ from 'lodash'
-import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
-import { Annotation } from 'src/snapshots/models/Annotation'
 import { uid } from 'quasar'
+import { Annotation } from 'src/snapshots/models/Annotation'
+import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
+import SnapshotsPersistence from 'src/snapshots/persistence/SnapshotsPersistence'
 
 class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
   private db: IDBPDatabase = null as unknown as IDBPDatabase

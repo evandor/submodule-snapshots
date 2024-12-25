@@ -1,5 +1,5 @@
-import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
 import { Annotation } from 'src/snapshots/models/Annotation'
+import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
 
 interface SnapshotsPersistence {
   // --- generic ---

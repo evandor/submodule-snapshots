@@ -1,6 +1,6 @@
+import _ from 'lodash'
 import Command from 'src/core/domain/Command'
 import { ExecutionResult } from 'src/core/domain/ExecutionResult'
-import _ from 'lodash'
 import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
 
 export class SaveMHtmlCommand implements Command<string> {
