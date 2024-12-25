@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
+import { Annotation } from 'src/snapshots/models/Annotation'
+import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
 import SnapshotsPersistence from 'src/snapshots/persistence/SnapshotsPersistence'
 import { ref } from 'vue'
-import { BlobMetadata, BlobType } from 'src/snapshots/models/BlobMetadata'
-import { Annotation } from 'src/snapshots/models/Annotation'
 
 export const useSnapshotsStore = defineStore('snapshots', () => {
   let storage: SnapshotsPersistence = null as unknown as SnapshotsPersistence

@@ -39,16 +39,15 @@
 </template>
 
 <script lang="ts" setup>
+import { date } from 'quasar'
+import Analytics from 'src/core/utils/google-analytics'
+import { BlobMetadata } from 'src/snapshots/models/BlobMetadata'
+import { SavedBlob } from 'src/snapshots/models/SavedBlob'
+import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
+import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
+import { useUiStore } from 'src/ui/stores/uiStore'
 import { onMounted, ref, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
-import { date } from 'quasar'
-import { useUiStore } from 'src/ui/stores/uiStore'
-import Analytics from 'src/core/utils/google-analytics'
-
-import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
-import { SavedBlob } from 'src/snapshots/models/SavedBlob'
-import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
-import { BlobMetadata } from 'src/snapshots/models/BlobMetadata'
 
 const route = useRoute()
 

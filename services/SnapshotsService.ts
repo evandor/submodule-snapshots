@@ -1,8 +1,8 @@
-import backendApi from 'src/services/BackendApi'
-import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
-import { BlobMetadata } from 'src/snapshots/models/BlobMetadata'
-import { Annotation } from 'src/snapshots/models/Annotation'
 import { uid } from 'quasar'
+import backendApi from 'src/services/BackendApi'
+import { Annotation } from 'src/snapshots/models/Annotation'
+import { BlobMetadata } from 'src/snapshots/models/BlobMetadata'
+import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
 
 export function useSnapshotsService() {
   const init = async () => {

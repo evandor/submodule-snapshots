@@ -1,8 +1,8 @@
+import _ from 'lodash'
 import Command from 'src/core/domain/Command'
 import { ExecutionFailureResult, ExecutionResult } from 'src/core/domain/ExecutionResult'
-import _ from 'lodash'
-import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
 import ContentUtils from 'src/core/utils/ContentUtils'
+import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
 
 export class SaveHtmlCommand implements Command<string> {
   constructor(
