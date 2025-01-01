@@ -29,7 +29,7 @@ export class SaveHtmlCommand implements Command<string> {
           //     console.log("getContent returned result with length", res, res?.html.length, chromeTab!.id)
           //     if (!res || !res.html) {
           //       return new ExecutionFailureResult("", "could not retrieve html")
-            // }
+          //     }
           //     // if (res.html) {
           //     //   var doc = (new DOMParser).parseFromString(res.html, "text/html");
           //     //   var article = new Readability(doc).parse();
