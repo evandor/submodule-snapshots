@@ -21,13 +21,7 @@ interface SnapshotsPersistence {
   // // ok (indexeddb)
   // savePdf(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
-  saveBlob(
-    id: string,
-    url: string,
-    data: Blob,
-    type: BlobType,
-    remark: string | undefined,
-  ): Promise<string>
+  saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string>
 
   // --- managing metadata ---
 

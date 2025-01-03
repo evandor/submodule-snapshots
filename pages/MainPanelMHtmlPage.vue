@@ -12,20 +12,15 @@
         </div>
 
         <div class="col q-my-md" v-if="!initialProceedToPage">
-          Archived Snapshots may not look exactly like their originals, but they will not change in
-          future.
+          Archived Snapshots may not look exactly like their originals, but they will not change in future.
         </div>
         <div class="col" v-if="!initialProceedToPage">
           <q-checkbox label="skip future acknowledgments" v-model="proceedToPage"></q-checkbox>
         </div>
         <div class="col q-my-md" v-if="!initialProceedToPage">
-          <span class="cursor-pointer text-accent text-bold" @click="loadArchivedPage()"
-            >Got it!</span
-          >
+          <span class="cursor-pointer text-accent text-bold" @click="loadArchivedPage()">Got it!</span>
         </div>
-        <div class="col q-my-md" v-if="initialProceedToPage && htmlMetadata?.url">
-          redirecting...
-        </div>
+        <div class="col q-my-md" v-if="initialProceedToPage && htmlMetadata?.url">redirecting...</div>
       </div>
     </div>
   </div>
@@ -128,13 +123,7 @@ watchEffect(async () => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.name === 'restore-selection') {
-    restoreSelection(
-      message.data.selection,
-      undefined,
-      message.data.rect,
-      message.data.viewport,
-      message.data.color,
-    )
+    restoreSelection(message.data.selection, undefined, message.data.rect, message.data.viewport, message.data.color)
   }
   sendResponse('done')
   return true
@@ -153,11 +142,7 @@ const setHtml = async () => {
       // // my_awesome_script.setAttribute('src','http://example.com/site.js');
       // my_awesome_script.text = "document.onpointerup = (e: any) => {alert(document.selection)}"
       css.type = 'text/css'
-      css.appendChild(
-        converted.window.document.createTextNode(
-          '::selection {color: red;background-color: yellow;}',
-        ),
-      )
+      css.appendChild(converted.window.document.createTextNode('::selection {color: red;background-color: yellow;}'))
       // css.appendChild(converted.window.document.createTextNode("[contenteditable=\"true\"]:focus {background-color: orange;}"));
       converted.window.document.head.appendChild(css)
 
