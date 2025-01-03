@@ -68,34 +68,19 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     return res
   }
 
-  const savePng = async (
-    id: string,
-    url: string,
-    img: Blob,
-    remark: string | undefined = undefined,
-  ): Promise<any> => {
+  const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
     const res = storage.saveBlob(id, url, img, BlobType.PNG, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const savePdf = async (
-    id: string,
-    url: string,
-    img: Blob,
-    remark: string | undefined = undefined,
-  ): Promise<any> => {
+  const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
     const res = storage.saveBlob(id, url, img, BlobType.PDF, remark)
     lastUpdate.value = new Date().getTime()
     return res
   }
 
-  const saveWarc = async (
-    id: string,
-    url: string,
-    img: Blob,
-    remark: string | undefined = undefined,
-  ): Promise<any> => {
+  const saveWarc = async (id: string, url: string, img: Blob, remark: string | undefined = undefined): Promise<any> => {
     const res = storage.saveBlob(id, url, img, BlobType.WARC, remark)
     lastUpdate.value = new Date().getTime()
     return res
@@ -122,25 +107,15 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     lastUpdate.value = new Date().getTime()
   }
 
-  const createAnnotation = async (
-    snapshotId: string,
-    annotation: Annotation,
-  ): Promise<Annotation[]> => {
+  const createAnnotation = async (snapshotId: string, annotation: Annotation): Promise<Annotation[]> => {
     return await storage.addAnnotation(snapshotId, annotation)
   }
 
-  const updateAnnotation = async (
-    tabId: string,
-    index: number,
-    annotation: Annotation,
-  ): Promise<Annotation[]> => {
+  const updateAnnotation = async (tabId: string, index: number, annotation: Annotation): Promise<Annotation[]> => {
     return await storage.updateAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = async (
-    metadataId: string,
-    toDelete: Annotation,
-  ): Promise<Annotation[]> => {
+  const deleteAnnotation = async (metadataId: string, toDelete: Annotation): Promise<Annotation[]> => {
     return storage.deleteAnnotation(metadataId, toDelete)
   }
 

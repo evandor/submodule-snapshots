@@ -18,48 +18,23 @@ export function useSnapshotsService() {
     throw new Error('not implemented H')
   }
 
-  const saveHTML = async (
-    id: string,
-    url: string,
-    html: string,
-    remark: string | undefined = undefined,
-  ) => {
+  const saveHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
     await useSnapshotsStore().saveHTML(id, url, html, remark)
   }
 
-  const saveEditedHTML = async (
-    id: string,
-    url: string,
-    html: string,
-    remark: string | undefined = undefined,
-  ) => {
+  const saveEditedHTML = async (id: string, url: string, html: string, remark: string | undefined = undefined) => {
     await useSnapshotsStore().saveEditedHTML(id, url, html, remark)
   }
 
-  const savePng = async (
-    id: string,
-    url: string,
-    img: Blob,
-    remark: string | undefined = undefined,
-  ) => {
+  const savePng = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
     return await useSnapshotsStore().savePng(id, url, img, remark)
   }
 
-  const savePdf = async (
-    id: string,
-    url: string,
-    img: Blob,
-    remark: string | undefined = undefined,
-  ) => {
+  const savePdf = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
     return await useSnapshotsStore().savePdf(id, url, img, remark)
   }
 
-  const saveWarc = async (
-    id: string,
-    url: string,
-    img: Blob,
-    remark: string | undefined = undefined,
-  ) => {
+  const saveWarc = async (id: string, url: string, img: Blob, remark: string | undefined = undefined) => {
     return await useSnapshotsStore().saveWarc(id, url, img, remark)
   }
 
@@ -103,20 +78,12 @@ export function useSnapshotsService() {
     return useSnapshotsStore().createAnnotation(snapshotId, annotation)
   }
 
-  const updateAnnotation = (
-    tabId: string,
-    annotation: Annotation,
-    index: number,
-  ): Promise<Annotation[]> => {
+  const updateAnnotation = (tabId: string, annotation: Annotation, index: number): Promise<Annotation[]> => {
     console.log('updateAnnotation', tabId, index, annotation, index)
     return useSnapshotsStore().updateAnnotation(tabId, index, annotation)
   }
 
-  const deleteAnnotation = (
-    metadataId: string,
-    a: Annotation,
-    i: number,
-  ): Promise<Annotation[]> => {
+  const deleteAnnotation = (metadataId: string, a: Annotation, i: number): Promise<Annotation[]> => {
     return useSnapshotsStore().deleteAnnotation(metadataId, a)
   }
 

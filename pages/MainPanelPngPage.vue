@@ -6,17 +6,13 @@
           <q-toolbar-title class="q-mb-lg">
             <div class="row justify-start items-baseline">
               <div class="col-1">
-                <span v-if="htmlMetadata" class="text-dark"
-                  >Archived Image for: {{ htmlMetadata.url }}</span
-                >
+                <span v-if="htmlMetadata" class="text-dark">Archived Image for: {{ htmlMetadata.url }}</span>
                 <span v-else class="text-dark"
                   >Archived Image for: <q-spinner-facebook color="primary" size="1em"
                 /></span>
               </div>
             </div>
-            <div class="text-caption">
-              Created {{ date.formatDate(htmlMetadata?.created, 'DD.MM.YYYY HH:mm') }}
-            </div>
+            <div class="text-caption">Created {{ date.formatDate(htmlMetadata?.created, 'DD.MM.YYYY HH:mm') }}</div>
           </q-toolbar-title>
         </div>
         <div class="col-xs-12 col-md-7 text-right">

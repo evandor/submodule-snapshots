@@ -84,11 +84,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return res.annotations
   }
 
-  async updateAnnotation(
-    sourceId: string,
-    index: number,
-    annotation: Annotation,
-  ): Promise<Annotation[]> {
+  async updateAnnotation(sourceId: string, index: number, annotation: Annotation): Promise<Annotation[]> {
     const res = (await this.db.get(this.META_STORE_IDENT, sourceId)) as BlobMetadata[]
     console.log('updating annotation', res, index)
     if (res[index]!.annotations) {
@@ -125,13 +121,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
    * add metadata for id; push to array if already existing
    * // TODO transaction
    */
-  async saveHTML(
-    id: string,
-    url: string,
-    data: Blob,
-    type: BlobType,
-    remark: string | undefined,
-  ): Promise<any> {
+  async saveHTML(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<any> {
     // const blobId = uid()
     // await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
     // const metadata = new BlobMetadata(id, blobId, BlobType.MHTML, url, remark)
@@ -139,13 +129,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
     return Promise.reject('not implemented G')
   }
 
-  async saveBlob(
-    id: string,
-    url: string,
-    data: Blob,
-    type: BlobType,
-    remark: string | undefined,
-  ): Promise<string> {
+  async saveBlob(id: string, url: string, data: Blob, type: BlobType, remark: string | undefined): Promise<string> {
     const blobId = uid()
     await this.db.put(this.BLOBS_STORE_IDENT, data, blobId)
 
