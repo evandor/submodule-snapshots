@@ -17,6 +17,9 @@ export class SaveMHtmlCommand implements Command<string> {
         if (tabCandidates.length > 0) {
           const captureDetails = { tabId: tabCandidates[0]!.id || 0 }
           console.log('about to capture', captureDetails)
+          if (!chrome.pageCapture) {
+            return Promise.reject("permission 'pageCapture' missing!")
+          }
           chrome.pageCapture.saveAsMHTML(captureDetails, async (html: Blob | undefined) => {
             //console.log("blob", html)
             if (html) {
