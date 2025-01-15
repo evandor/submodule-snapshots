@@ -24,7 +24,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async init() {
-    console.debug(` ...initialized snapshots: ${this.getServiceName()}`, '✅')
+    // console.debug(` ...initialized snapshots: ${this.getServiceName()}`, '✅')
     return Promise.resolve('')
   }
 
@@ -100,7 +100,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
       console.debug('user not set (yet) in getMetadata')
       return Promise.resolve([])
     }
-    console.debug(' ...loading metadata', this.getServiceName(), useAuthStore().user.uid)
+    //console.debug(' ...loading metadata', this.getServiceName(), useAuthStore().user.uid)
     const mds: BlobMetadata[] = []
     // useUiStore().syncing = true
     const docs = await getDocs(metadataCollection())
@@ -109,7 +109,7 @@ class FirestoreSnapshotsPersistence implements SnapshotsPersistence {
       //console.log("newItem", newItem)
       mds.push(newItem)
     })
-    console.log('loading metadata, found ', mds.length)
+    //console.log('loading metadata, found ', mds.length)
     // useUiStore().syncing = false
     return Promise.resolve(mds)
   }

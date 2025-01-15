@@ -6,7 +6,7 @@ import { useSnapshotsStore } from 'src/snapshots/stores/SnapshotsStore'
 
 export function useSnapshotsService() {
   const init = async () => {
-    console.debug(' ...initialized snapshots: Service', '✅')
+    // console.debug(' ...initialized snapshots: Service', '✅')
   }
 
   const convertFrom = (html: string) => {

@@ -81,7 +81,7 @@ class GitSnapshotsPersistence implements SnapshotsPersistence {
   }
 
   async init(): Promise<any> {
-    console.log(" ...initializing GitPersistenceService")
+    // console.log(" ...initializing GitPersistenceService")
     const url = "https://github.com/evandor/tabsets-data"//useAuthStore().getAccount()?.userData?.sync?.url
     if (url) {
       this.author = {

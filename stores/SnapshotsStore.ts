@@ -16,7 +16,7 @@ export const useSnapshotsStore = defineStore('snapshots', () => {
     await storage.init()
     metadata.value = await storage.getMetadata()
     lastUpdate.value = new Date().getTime()
-    console.debug(' ...initialized snapshots: Store', '✅')
+    // console.debug(' ...initialized snapshots: Store', '✅')
   }
 
   const saveHTML = async (
