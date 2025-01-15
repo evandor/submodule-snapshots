@@ -17,7 +17,7 @@ class IndexedDbSnapshotsPersistence implements SnapshotsPersistence {
 
   async init() {
     this.db = await this.initDatabase()
-    console.debug(` ...initialized snapshots: ${this.getServiceName()}`, '✅')
+    // console.debug(` ...initialized snapshots: ${this.getServiceName()}`, '✅')
     return Promise.resolve()
   }
 
