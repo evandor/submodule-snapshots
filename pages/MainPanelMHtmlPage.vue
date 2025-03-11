@@ -167,23 +167,6 @@ const setHtml = async () => {
 
       converted.window.document.body.appendChild(overlayDiv)
 
-      // const overlayScript = converted.window.document.createElement('script')
-      // overlayScript.onload = function() {
-      //   alert("Script loaded and ready");
-      // };
-      // //overlayScript.src = "chrome-extension://pndffocijjfpmphlhkoijmpfckjafdpl/www/js/my-content-script.js";
-      //
-      // overlayScript.type = 'text/javascript';
-      // var code = 'console.log("script insert");';
-      // try { // doesn't work on ie...
-      //   overlayScript.appendChild(document.createTextNode(code));
-      // } catch(e) { // IE has funky script nodes
-      //   overlayScript.text = code;
-      // }
-
-      // overlayScript.execute
-      //converted.window.document.body.appendChild(overlayScript)
-
       const htmlBlob = converted.window.document.documentElement.innerHTML
 
       const $ = cheerio.load(htmlBlob)
