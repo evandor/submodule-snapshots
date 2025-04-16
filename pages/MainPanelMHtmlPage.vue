@@ -165,7 +165,7 @@ const setHtml = async () => {
 
       //overlayDiv.appendChild(overlayBtn)
 
-      converted.window.document.body.appendChild(overlayDiv)
+      // converted.window.document.body.appendChild(overlayDiv)
 
       const htmlBlob = converted.window.document.documentElement.innerHTML
 
