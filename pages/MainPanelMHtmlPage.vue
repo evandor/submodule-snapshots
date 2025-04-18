@@ -116,7 +116,7 @@ onMounted(() => {
   }
 })
 
-watchEffect(async () => {
+watchEffect(() => {
   snapshotId.value = route.params.snapshotId as string
   console.log(`got snapshotId ${snapshotId.value}`)
 })
@@ -196,6 +196,7 @@ const loadArchivedPage = () => {
   document.documentElement.innerHTML = htmlSnapshot.value
 }
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 watchEffect(async () => {
   if (snapshotId.value && useSnapshotsStore().lastUpdate) {
     htmlMetadata.value = await useSnapshotsService().getMetadataById(snapshotId.value)

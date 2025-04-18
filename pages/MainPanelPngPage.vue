@@ -57,7 +57,7 @@ onMounted(() => {
   Analytics.firePageViewEvent('MainPanelPngPage', document.location.href)
 })
 
-watchEffect(async () => {
+watchEffect(() => {
   snapshotId.value = route.params.snapshotId as string
   console.log(`got snapshotId ${snapshotId.value}`)
 })
@@ -75,6 +75,7 @@ function setImage(index: number) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-misused-promises
 watchEffect(async () => {
   if (snapshotId.value) {
     if (useSnapshotsStore().lastUpdate) {
@@ -87,7 +88,7 @@ watchEffect(async () => {
   }
 })
 
-watchEffect(async () => {
+watchEffect(() => {
   tabId.value = route.params.tabId as string
   blobId.value = route.params.blobId as string
   if (blobId.value && useUiStore().dbReady) {

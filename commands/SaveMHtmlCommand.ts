@@ -20,6 +20,8 @@ export class SaveMHtmlCommand implements Command<string> {
           if (!chrome.pageCapture) {
             return Promise.reject("permission 'pageCapture' missing!")
           }
+
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           chrome.pageCapture.saveAsMHTML(captureDetails, async (html: Blob | undefined) => {
             //console.log("blob", html)
             if (html) {
