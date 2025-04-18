@@ -21,6 +21,7 @@ export class SaveHtmlCommand implements Command<string> {
 
           const chromeTab = tabCandidates[0]
 
+          // eslint-disable-next-line @typescript-eslint/no-misused-promises
           chrome.tabs.sendMessage(chromeTab!.id || 0, 'getExcerpt', {}, async (res) => {
             console.log('getContent returned result with length', res, res?.html.length, chromeTab!.id)
             if (!res || !res.html) {
