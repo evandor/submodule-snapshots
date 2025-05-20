@@ -10,36 +10,24 @@ export class SaveMHtmlCommand implements Command<string> {
   ) {}
 
   async execute(): Promise<ExecutionResult<string>> {
-    return chrome.tabs
-      .query({ currentWindow: true })
-      .then((tabs: chrome.tabs.Tab[]) => {
-        const tabCandidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === this.url)
-        if (tabCandidates.length > 0) {
-          const captureDetails = { tabId: tabCandidates[0]!.id || 0 }
-          console.log('about to capture', captureDetails)
-          if (!chrome.pageCapture) {
-            return Promise.reject("permission 'pageCapture' missing!")
-          }
+    const tabs: chrome.tabs.Tab[] = await chrome.tabs.query({ currentWindow: true })
+    const tabCandidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === this.url)
+    if (tabCandidates.length > 0) {
+      const captureDetails = { tabId: tabCandidates[0]!.id || 0 }
+      console.log('about to capture', captureDetails)
+      if (!chrome.pageCapture) {
+        return Promise.reject("permission 'pageCapture' missing!")
+      }
 
-          // eslint-disable-next-line @typescript-eslint/no-misused-promises
-          chrome.pageCapture.saveAsMHTML(captureDetails, async (html: Blob | undefined) => {
-            //console.log("blob", html)
-            if (html) {
-              // && this.tab) {
-              const mhtmlId = await useSnapshotsStore().saveMHtml(this.id, this.url || '', html)
-              return Promise.resolve(mhtmlId)
-            }
-            return Promise.reject('no html found')
-          })
-          return new ExecutionResult('trying to save', 'trying to save')
-        } else {
-          // console.debug(`did not contain wanted url ${this.url}:\n - ${_.join(_.map(tabs, (t: chrome.tabs.Tab) => t.url), ',\n')}`)
-          return Promise.reject('no candidate found')
-        }
-      })
-      .catch((err) => {
-        return Promise.reject(err)
-      })
+      const html: Blob | undefined = await chrome.pageCapture.saveAsMHTML(captureDetails)
+      if (html) {
+        const mhtmlId = await useSnapshotsStore().saveMHtml(this.id, this.url || '', html)
+        return Promise.resolve(new ExecutionResult(mhtmlId, 'done'))
+      }
+      return Promise.reject('no html found')
+    } else {
+      return Promise.reject('no candidate found')
+    }
   }
 }
 
