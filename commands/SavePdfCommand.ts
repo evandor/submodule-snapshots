@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import Command from 'src/core/domain/Command'
 import { ExecutionResult } from 'src/core/domain/ExecutionResult'
-import { useSnapshotsService } from 'src/snapshots/services/SnapshotsService'
 
 export class SavePdfCommand implements Command<string> {
   constructor(
@@ -16,56 +15,6 @@ export class SavePdfCommand implements Command<string> {
     const tabcandidates = _.filter(tabs, (t: chrome.tabs.Tab) => t?.url === this.url)
     if (tabcandidates.length > 0) {
       console.log('about to capture pdf')
-
-      const chromeTab = tabcandidates[0]
-
-      // chrome.tabs.sendMessage(
-      //   chromeTab!.id || 0,
-      //   "getExcerpt",
-      //   {},
-      //   async (res) => {
-      //    // console.log("msg: ",res)
-      //     console.log("getContent returned result with length", res?.html?.length, chromeTab!.id)
-      //     // let html = await ContentUtils.setBaseHref(tabCandidates[0].url || '', res.content)
-      //     let html = res.html
-      //     return useSnapshotsService().pdfFrom(html)
-      //       .then((res: any) => {
-      //         console.log("res", res, typeof res)
-      //         console.log("res2", typeof res.data)
-      //
-      //         useSnapshotsService().savePdf(this.id, chromeTab!.url || '', res.data)
-      //         // useSnapshotsService().saveHTML(this.saveAsId, this.chromeTab.url || '', html, this.remark)
-      //
-      //         return new ExecutionResult(
-      //           "done",
-      //           "PDF created")
-      //       }).catch((err: any) => {
-      //         console.warn("got error: ", err)
-      //         //return handleError(err)
-      //       })
-      //
-      //
-      //   })
-
-      // const res = await chrome.tabs.sendMessage(
-      //   chrometab.id || 0,
-      //   "getExcerpt",
-      //   {})//,
-      // //async (res) => {
-      // console.log("getcontent returned result with length", res?.content?.length, chrometab.id)
-      // // let html = await contentutils.setbasehref(tabcandidates[0].url || '', res.content)
-      // let html = res.content
-      // try {
-      //   const res2 = await useSnapshotsService().pdfFrom(html)
-      //   await useSnapshotsService().savePdf(this.id, chrometab.url || '', res2.data)
-      //   return new ExecutionResult<string>(
-      //     "done",
-      //     "pdf created")
-      // } catch (err: any) {
-      //   console.warn("got error: ", err)
-      // }
-      // //})
-
       return new ExecutionResult('trying to save', 'trying to save')
     } else {
       // console.debug(`did not contain wanted url ${this.url}:\n - ${_.join(_.map(tabs, (t: chrome.tabs.tab) => t.url), ',\n')}`)
